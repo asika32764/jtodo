@@ -1,0 +1,24 @@
+{
+    "name": "joomla/todo",
+    "description": "Todo application built on the Joomla! Framework integrating with GitHub.",
+    "keywords": ["joomla","todo"],
+    "homepage": "https://github.com/asika32764/todo",
+    "license": "GPL-2.0+",
+	"version": "1.0.0-alpha",
+    "require": {
+        "php": ">=5.3.10",
+        "joomla/framework": "dev-master",
+        "symfony/http-foundation": "2.3.*@stable",
+        "elkuku/console-progressbar": "1.0",
+        "twig/twig" : "1.*@stable"
+    },
+	"require-dev": {
+		"monolog/monolog": "1.5.0",
+		"raveren/kint": "dev-master",
+		"filp/whoops": "1.0.7"
+	},
+    "autoload": {
+        "psr-0": { "": "src/" }
+    },
+    "minimum-stability": "dev"
+}
