@@ -10,7 +10,10 @@
         "joomla/framework": "dev-master",
         "symfony/http-foundation": "2.3.*@stable",
         "elkuku/console-progressbar": "1.0",
-        "twig/twig" : "1.*@stable"
+        "twig/twig" : "1.*@stable",
+		"doctrine/orm": ">=2.2.3,<2.4-dev",
+        "doctrine/migrations": "dev-master",
+        "doctrine/data-fixtures": "dev-master"
     },
 	"require-dev": {
 		"monolog/monolog": "1.5.0",
