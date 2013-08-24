@@ -8,9 +8,10 @@ namespace Components\Debugger;
 
 use Joomla\Factory;
 use Joomla\Profiler\Profiler;
-
 use Joomla\Utilities\ArrayHelper;
+
 use App\Joomla\Application\Application;
+use App\Joomla\Component\AbstractComponent;
 
 use Components\Debugger\Database\DatabaseDebugger;
 use Components\Debugger\Format\Html\SqlFormat;
@@ -36,14 +37,8 @@ use Whoops\Run;
  *
  * @since  1.0
  */
-class DebuggerComponent implements LoggerAwareInterface
+class DebuggerComponent extends AbstractComponent implements LoggerAwareInterface
 {
-	/**
-	 * @var    TrackerApplication
-	 * @since  1.0
-	 */
-	private $application;
-
 	/**
 	 * @var    array
 	 * @since  1.0
@@ -71,9 +66,9 @@ class DebuggerComponent implements LoggerAwareInterface
 	 */
 	public function __construct(Application $application, \Joomla\DI\Container $container)
 	{
-		$this->application = $application;
+		parent::__construct($application, $container);
 
-		$this->profiler = $application->get('debug.system') ? new Profiler('Tracker') : null;
+		$this->profiler = $application->getProfiler();
 
 		$this->setupLogging();
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the Joomla Tracker Application Package
+ * Part of the Joomla Standard Edition Application Package
  *
  * @copyright  Copyright (C) 2012 - 2013 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
@@ -136,11 +136,6 @@ final class Application extends AbstractWebApplication implements ContainerAware
 		// @todo Decouple from Factory
 		Factory::$application = $this;
         Factory::$container = $this->getContainer() ;
-
-		// Load the library language file
-		//$this->getLanguage()->load('lib_joomla', JPATH_BASE);
-
-		//$this->mark('Application started');
 	}
     
     /**
@@ -162,6 +157,11 @@ final class Application extends AbstractWebApplication implements ContainerAware
         
         // Register the event dispatcher
         $this->loadDispatcher();
+        
+        // Load the library language file
+		$this->getLanguage()->load('lib_joomla', JPATH_BASE);
+        
+        $this->mark('application.afterInitialise');
 	}
     
     /**
