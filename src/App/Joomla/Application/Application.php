@@ -418,7 +418,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
                 throw new \RuntimeException($class.' not found');
             }
             
-            $container->set('component.'.$key, new $class($this, $this->container));
+            new $class($this, $container, 'component.' . $key);
         }
         
         return $this;

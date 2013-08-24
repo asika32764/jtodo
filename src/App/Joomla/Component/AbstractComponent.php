@@ -39,14 +39,26 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
     /**
 	 * Constructor.
 	 *
-	 * @param   TrackerApplication  $application  The application
+	 * @param   Application  $application  The application
+	 * @param   Container    $container    DI Container
+	 * @param   string       $name         A component name alias in container, if is null,
+	 *                                     will get from class name.
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Application $application, Container $container)
+	public function __construct(Application $application, Container $container, $name = null)
     {
         $this->application = $application;
-		
+        
+		$ref = new \ReflectionClass($this);
+        
+        if(!$name)
+        {
+            $name = str_replace('component', '', strtolower($ref->getShortName()));
+        }
+        
+        $this->setName($name);
+        
 		$this->register($container);
     }
     
@@ -61,7 +73,7 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
 	 */
 	public function register(Container $container)
     {
-        $container->set($this->getName(), $this);
+        $container->set('component.' . $this->getName(), $this);
         
         return $container;
     }
