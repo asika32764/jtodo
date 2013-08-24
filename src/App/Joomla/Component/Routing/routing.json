@@ -1,0 +1,16 @@
+{
+    "_default" : [
+        {
+            "pattern" : ":controller/:id/:action",
+            "controller" : "\\{:component}\\Controller\\{:controller}Controller"
+        },
+        {
+            "pattern" : ":controller/:id",
+            "controller" : "\\{:component}\\Controller\\{:controller}Controller"
+        },
+        {
+            "pattern" : ":controller",
+            "controller" : "\\{:component}\\Controller\\{:controller}Controller"
+        }
+    ]
+}

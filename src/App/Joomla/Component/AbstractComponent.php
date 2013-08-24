@@ -48,7 +48,8 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
 	 */
 	public function __construct(Application $application, Container $container, $name = null)
     {
-        $this->application = $application;
+        $this->application  = $application;
+        $this->container    = $container;
         
 		$ref = new \ReflectionClass($this);
         
@@ -92,5 +93,62 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
     public function setName($name)
     {
         $this->name = $name ;
+    }
+    
+    /**
+     * Parse uri segments as route.
+     *
+     * @param   string  $segments   URI segments.
+     *
+     * @return  array   Query vars.
+     *
+     * @since   1.0
+     */
+    public function parseRoute($segments)
+    {
+        $controller = array_shift($segments);
+        //$controller = '\\' . ucfirst($this->getName()) . '\\Controller\\' . ucfirst($controller) . 'Controller' ;
+        $this->getRouterMapping($controller);
+        
+    }
+    
+    /**
+     * Build query to uri.
+     *
+     * @param   string  $query   URL query.
+     *
+     * @return  array   Uri segments.
+     *
+     * @since   1.0
+     */
+    public function buildRoute($query)
+    {
+        
+    }
+    
+    /**
+     * function getRouterConfig
+     */
+    public function getRouterMapping($defaultController)
+    {
+        $file       = __DIR__.'/Routing/routing.json';
+        $mapping    = json_decode(file_get_contents($file));
+        
+        $router = $this->container->get('system.router');
+        
+        foreach($mapping->_default as $routing)
+        {
+            $replace = array(
+                '{:component}'  => ucfirst($this->getName()),
+                '{:controller}' =>  ucfirst($defaultController)
+            );
+            
+            $controller = strtr($routing->controller, $replace);
+            
+            $router->addMap($routing->pattern, $controller);
+        }
+        
+        
+        //show($router);die;
     }
 }

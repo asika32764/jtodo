@@ -56,23 +56,23 @@ class Router extends RouterBase
 	 * @since   1.0
 	 * @throws  RoutingException
 	 */
-	public function getController($route)
-	{	
-		try
-		{
-			return parent::getController($route);
-		}
-		catch (\InvalidArgumentException $e)
-		{
-			// 404
-			throw new RoutingException($e->getMessage());
-		}
-		catch (\RuntimeException $e)
-		{
-			// 404
-			throw new RoutingException($e->getMessage());
-		}
-	}
+	//public function getController($route)
+	//{	
+	//	try
+	//	{
+	//		return parent::getController($route);
+	//	}
+	//	catch (\InvalidArgumentException $e)
+	//	{
+	//		// 404
+	//		throw new RoutingException($e->getMessage());
+	//	}
+	//	catch (\RuntimeException $e)
+	//	{
+	//		// 404
+	//		throw new RoutingException($e->getMessage());
+	//	}
+	//}
 
 	/**
 	 * Get a ControllerInterface object for a given name.

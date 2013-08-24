@@ -1,3 +1,6 @@
 {
-    "categories" : "\\Todo\\Controller\\CategoriesController"
+    "categories" : "\\Todo\\Controller\\CategoriesController" ,
+    "todo" : "\\Todo\\Controller\\TodoController" ,
+    "ggg/:bbb" : "ewlthjt" ,
+    "asdasd/asd/:alias" : "sadewr"
 }

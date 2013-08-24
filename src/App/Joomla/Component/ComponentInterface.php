@@ -10,5 +10,43 @@ namespace App\Joomla\Component;
 
 interface ComponentInterface
 {
+    /**
+     * Get component name.
+     *
+     * @return  string
+     * 
+     * @since 1.0
+     */
+    public function getName();
     
+    /**
+     * Set component name.
+     *
+     * @return  string
+     * 
+     * @since 1.0
+     */
+    public function setName($name);
+    
+    /**
+     * Parse uri segments as route.
+     *
+     * @param   string  $segments   URI segments.
+     *
+     * @return  array   Query vars.
+     *
+     * @since   1.0
+     */
+    public function parseRoute($segments);
+    
+    /**
+     * Build query to uri.
+     *
+     * @param   string  $query   URL query.
+     *
+     * @return  array   Uri segments.
+     *
+     * @since   1.0
+     */
+    public function buildRoute($query);
 }
