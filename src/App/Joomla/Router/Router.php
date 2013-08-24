@@ -56,60 +56,23 @@ class Router extends RouterBase
 	 * @since   1.0
 	 * @throws  RoutingException
 	 */
-	//public function getController($route)
-	//{	
-	//	try
-	//	{
-	//		return parent::getController($route);
-	//	}
-	//	catch (\InvalidArgumentException $e)
-	//	{
-	//		// 404
-	//		throw new RoutingException($e->getMessage());
-	//	}
-	//	catch (\RuntimeException $e)
-	//	{
-	//		// 404
-	//		throw new RoutingException($e->getMessage());
-	//	}
-	//}
-
-	/**
-	 * Get a ControllerInterface object for a given name.
-	 *
-	 * @param   string  $name  The controller name (excluding prefix) for which to fetch and instance.
-	 *
-	 * @return  ControllerInterface
-	 *
-	 * @since   1.0
-	 * @throws  \RuntimeException
-	 */
-	protected function fetchController($name)
-	{
-		// Derive the controller class name.
-		$class = $this->controllerPrefix . ucfirst($name);
-
-		// Check for the requested controller.
-		if (!class_exists($class) || !is_subclass_of($class, 'Joomla\\Controller\\ControllerInterface'))
+	public function getController($route)
+	{	
+		try
 		{
-			// See if there's an action class in the libraries if we aren't calling the default task
-			$task = $this->input->getCmd('task');
-
-			if ($task && $task != 'default')
-			{
-				$class = '\\JTracker\\Controller\\' . ucfirst($task) . 'Controller';
-			}
-
-			if (!class_exists($class) || !is_subclass_of($class, 'Joomla\\Controller\\ControllerInterface'))
-			{
-				// Nothing found. Panic.
-				throw new \RuntimeException(sprintf('Controller not found for %s task', $task));
-			}
+			return parent::getController($route);
 		}
-
-		// Instantiate the controller.
-		$controller = new $class($this->input, $this->app);
-
-		return $controller;
+		catch (\InvalidArgumentException $e)
+		{
+			// 404
+			throw new RoutingException($e->getMessage());
+		}
+		catch (\RuntimeException $e)
+		{
+			// 404
+			throw new RoutingException($e->getMessage());
+		}
 	}
+
+
 }

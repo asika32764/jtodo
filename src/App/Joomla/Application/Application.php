@@ -254,9 +254,9 @@ final class Application extends AbstractWebApplication implements ContainerAware
             
             $router->addMaps($maps, true);
             $component->parseRoute($segments);
-            $router->setControllerPrefix('\\Components');
+            $router->setControllerPrefix('Components');
             
-            echo $controller = $router->getController(implode('/', $segments));die;
+            $controller = $router->getController(implode('/', $segments));
             //show($controller);
             echo $controller->execute();
             
@@ -305,7 +305,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
 
                 $context['action'] = $exception->getAction();
             }
-
+throw new \RuntimeException("Authentication failure.");
             $this->setBody($this->container->get('component.debugger')->renderException($exception, $context));
         }
         catch (RoutingException $exception)
@@ -315,7 +315,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
             $this->mark('Application terminated with a ROUTING EXCEPTION');
 
             $context = JDEBUG ? array('message' => $exception->getRawRoute()) : array();
-
+            throw new \RuntimeException("HTTP/1.1 404 Not Found.");
             $this->setBody($this->debugger->renderException($exception, $context));
         }
         catch (\InvalidArgumentException $exception)
@@ -327,7 +327,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
             header('HTTP/1.1 500 Internal Server Error', true, 500);
 
             $this->mark('Application terminated with an EXCEPTION');
-
+            throw new \RuntimeException("HTTP/1.1 500 Internal Server Error");
             $this->setBody($this->container->get('component.debugger')->renderException($exception));
         }
     }

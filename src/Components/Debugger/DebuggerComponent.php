@@ -382,9 +382,8 @@ class DebuggerComponent extends AbstractComponent implements LoggerAwareInterfac
 			. 'Previous: ' . get_class($exception->getPrevious());
 		}
 
-		$viewClass = '\\JTracker\\View\\TrackerDefaultView';
+		$viewClass = '\\App\\Joomla\\View\\DefaultView';
 
-		/* @type \JTracker\View\TrackerDefaultView $view */
 		$view = new $viewClass;
 
 		$message = '';
