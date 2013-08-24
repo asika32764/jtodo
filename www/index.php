@@ -7,8 +7,12 @@
 // Set error reporting for development
 error_reporting(32767);
 
+function show($data) {
+    echo '<pre>'.print_r($data, 1).'</pre>';
+}
+
 // Define base path
-define('JPATH_BASE', __DIR__);
+define('JPATH_BASE', dirname(__DIR__));
 require JPATH_BASE . '/app/defines.php';
 
 // Load the Composer autoloader
@@ -18,7 +22,7 @@ require JPATH_BASE . '/vendor/autoload.php';
 require JPATH_BASE . '/vendor/joomla/framework/src/import.php';
 
 // Instantiate the application.
-$application = new App\Application\TrackerApplication;
+$application = new Components\Joomla\Application\Application;
 
 // Execute the application.
 $application->execute();

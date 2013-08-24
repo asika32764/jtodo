@@ -14,6 +14,9 @@
 # COMPOSER Files #
 vendor/*
 composer.phar
+composer.lock
 
 # Build/Test related files #
+tests/*
 cache.properties
+phpunit.xml
