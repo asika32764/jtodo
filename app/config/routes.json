@@ -1,6 +1,6 @@
 {
-    "debug" : {
-        "pattern" : "/debug",
+    "_default" : {
+        "pattern" : "/:component",
         "resource" : ""
     }
 }

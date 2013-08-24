@@ -233,19 +233,35 @@ final class Application extends AbstractWebApplication implements ContainerAware
             
 			// Instantiate the router
 			$router = new Router($this->input, $this);
-			$maps = json_decode(file_get_contents(JPATH_BASE . '/app/config/routes.json'));
-
-			if (!$maps)
+            
+            $route = $this->get('uri.route');
+            
+            $segments = explode('/', $route);
+            $component = array_shift($segments);
+            $maps = json_decode(file_get_contents(JPATH_SOURCE . '/Components/' . ucfirst($component) .  '/Config/routing.json'));
+            
+            if (!$maps)
 			{
 				throw new \RuntimeException('Invalid router file.', 500);
 			}
-
-			$router->addMaps($maps, true);
+            
+            $router->addMaps($maps, true);
 			$router->setControllerPrefix('\\Components');
-			$router->setDefaultController('\\Tracker\\Controller\\DefaultController');
+            
+            $controller = $router->getController(implode('/', $segments));
+            //show($controller);
+            echo $controller->execute();
+            
+            die;
+            //$router->addMap($maps->_default->pattern, true);
+            
+            /*
+			//$router->addMaps($maps, true);
+			$router->setControllerPrefix('\\Components');
+			$router->setDefaultController('\\Todo\\Controller\\CategoriesController');
             
 			// Fetch the controller
-			/* @type AbstractTrackerController $controller */
+			
 			$controller = $router->getController($this->get('uri.route'));
 
 			// Define the app path
@@ -259,6 +275,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
 			$contents = str_replace('%%%DEBUG%%%', $this->debugger->getOutput(), $contents);
 
 			$this->setBody($contents);
+            */
 		}
 		catch (AuthenticationException $exception)
 		{
@@ -339,6 +356,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
 
 		// Find the configuration file.
         foreach( new \FilesystemIterator(JPATH_CONFIGURATION) as $file ) :
+        
             $fileName = $file->getFileName();
             
             if(strpos($fileName, $name) !== false) {
@@ -350,11 +368,18 @@ final class Application extends AbstractWebApplication implements ContainerAware
                 }
                 
                 // Load the configuration file into Registry.
-                $result = $this->config->loadFile($file->getRealPath(), $file->getExtension());
+                $path   = $file->getRealPath();
+                $ext    = $file->getExtension();
+                $result = $this->config->loadFile($path, $ext);
                 
                 if (!$result)
                 {
                     throw new \RuntimeException(sprintf('Unable to parse the configuration file %s.', $file));
+                }
+                
+                if(!$this->config->get('system.config_type'))
+                {
+                    $this->config->set('system.config_type', $ext);
                 }
                 
                 break;

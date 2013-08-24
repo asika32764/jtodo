@@ -33,7 +33,7 @@ use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 
 /**
- * Class TrackerDebugger.
+ * Class Debugger Component.
  *
  * @since  1.0
  */
