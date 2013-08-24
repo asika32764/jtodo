@@ -6,14 +6,14 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Joomla\Router;
+namespace App\Joomla\Router;
 
 use Joomla\Application\AbstractApplication;
 use Joomla\Controller\ControllerInterface;
 use Joomla\Input\Input;
 use Joomla\Router\Router as RouterBase;
 use Joomla\Factory;
-use Components\Joomla\Router\Exception\RoutingException;
+use App\Joomla\Router\Exception\RoutingException;
 
 /**
  * Joomla! Tracker Router

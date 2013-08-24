@@ -22,7 +22,7 @@ require JPATH_BASE . '/vendor/autoload.php';
 require JPATH_BASE . '/vendor/joomla/framework/src/import.php';
 
 // Instantiate the application.
-$application = new Components\Joomla\Application\Application;
+$application = new App\Joomla\Application\Application;
 
 // Execute the application.
 $application->execute();

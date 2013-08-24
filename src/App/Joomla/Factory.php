@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-namespace Components\Joomla;
+namespace App\Joomla;
 
 use Joomla\Factory as FactoryBase;
 

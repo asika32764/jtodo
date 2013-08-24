@@ -8,7 +8,7 @@
 
 namespace Components\Debugger\Model;
 
-use Components\Joomla\Model\AbstractTrackerDatabaseModel;
+use App\Joomla\Model\AbstractTrackerDatabaseModel;
 
 /**
  * Default model class for the Debug component.

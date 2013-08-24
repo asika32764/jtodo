@@ -1,3 +1,6 @@
 {
-    "debug/:name/:alias/:id" : "\\Debugger\\Controller\\DDD"
+    "debug" : {
+        "pattern" : "/debug",
+        "resource" : ""
+    }
 }

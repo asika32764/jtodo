@@ -8,7 +8,7 @@
 
 namespace Components\Debugger\Controller;
 
-use Components\Joomla\Controller\AbstractTrackerController;
+use App\Joomla\Controller\AbstractTrackerController;
 
 /**
  * Controller class to display the application configuration

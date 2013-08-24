@@ -8,7 +8,7 @@ namespace Components\Debugger\View\Logs;
 
 use Joomla\Factory;
 use Components\Debugger\TrackerDebugger;
-use Components\Joomla\View\AbstractTrackerHtmlView;
+use App\Joomla\View\AbstractTrackerHtmlView;
 
 /**
  * System configuration view.

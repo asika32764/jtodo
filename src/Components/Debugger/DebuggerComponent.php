@@ -10,7 +10,7 @@ use Joomla\Factory;
 use Joomla\Profiler\Profiler;
 
 use Joomla\Utilities\ArrayHelper;
-use Components\Joomla\Application\Application;
+use App\Joomla\Application\Application;
 
 use Components\Debugger\Database\DatabaseDebugger;
 use Components\Debugger\Format\Html\SqlFormat;
@@ -36,7 +36,7 @@ use Whoops\Run;
  *
  * @since  1.0
  */
-class Debugger implements LoggerAwareInterface
+class DebuggerComponent implements LoggerAwareInterface
 {
 	/**
 	 * @var    TrackerApplication
@@ -69,7 +69,7 @@ class Debugger implements LoggerAwareInterface
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Application $application)
+	public function __construct(Application $application, \Joomla\DI\Container $container)
 	{
 		$this->application = $application;
 

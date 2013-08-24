@@ -6,9 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Joomla\Application;
-
-use Components\Debugger\Debugger;
+namespace App\Joomla\Application;
 
 use Joomla\Application\AbstractWebApplication;
 use Joomla\Controller\ControllerInterface;
@@ -19,15 +17,17 @@ use Joomla\Github\Http;
 use Joomla\Http\HttpFactory;
 use Joomla\Language\Language;
 use Joomla\Registry\Registry;
+use Joomla\Profiler\Profiler;
 use Joomla\DI\Container;
+use Joomla\DI\ContainerAwareInterface;
 
-//use Components\Joomla\Authentication\Exception\AuthenticationException;
-//use Components\Joomla\Authentication\GitHub\GitHubUser;
-//use Components\Joomla\Authentication\User;
-//use Components\Joomla\Controller\AbstractTrackerController;
-use Components\Joomla\Router\Exception\RoutingException;
-use Components\Joomla\Router\Router;
-use Components\Joomla\Factory;
+//use App\Joomla\Authentication\Exception\AuthenticationException;
+//use App\Joomla\Authentication\GitHub\GitHubUser;
+//use App\Joomla\Authentication\User;
+//use App\Joomla\Controller\AbstractTrackerController;
+use App\Joomla\Router\Exception\RoutingException;
+use App\Joomla\Router\Router;
+use App\Joomla\Factory;
 
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @since  1.0
  */
-final class Application extends AbstractWebApplication
+final class Application extends AbstractWebApplication implements ContainerAwareInterface
 {
 	/**
 	 * The Dispatcher object.
@@ -53,6 +53,22 @@ final class Application extends AbstractWebApplication
 	 * @since  1.0
 	 */
 	protected $name = null;
+    
+    /**
+	 * Environment name.
+	 *
+	 * @var    array
+	 * @since  1.0
+	 */
+	protected $environment = null;
+    
+    /**
+	 * DI Container object.
+	 *
+	 * @var    object
+	 * @since  1.0
+	 */
+	protected $container = null;
 
 	/**
 	 * A session object.
@@ -96,12 +112,12 @@ final class Application extends AbstractWebApplication
 	private $language;
 
 	/**
-	 * The Debugger object
+	 * The Profiler object
 	 *
-	 * @var    TrackerDebugger
+	 * @var    Profiler
 	 * @since  1.0
 	 */
-	private $debugger;
+	private $profiler;
 
 	/**
 	 * Class constructor.
@@ -113,49 +129,92 @@ final class Application extends AbstractWebApplication
 		// Run the parent constructor
 		parent::__construct();
         
-        // Load DI container
-        $this->container = new Container();
+        $this->mark('application.start');
+        $this->getContainer()->set('profiler', $this->getProfiler(), false, true);
         
-		// Load the configuration object.
-		$this->loadConfiguration();
-
-		// Set the debugger.
-		$this->debugger = new Debugger($this);
-        $this->container->set('debugger', $this->debugger);
-        
-		// Register the event dispatcher
-		$this->loadDispatcher();
-
 		// Register the application to Factory
 		// @todo Decouple from Factory
 		Factory::$application = $this;
-		Factory::$config    = $this->config;
-        Factory::$container = $this->container ;
+        Factory::$container = $this->getContainer() ;
 
 		// Load the library language file
-		$this->getLanguage()->load('lib_joomla', JPATH_BASE);
+		//$this->getLanguage()->load('lib_joomla', JPATH_BASE);
 
-		$this->mark('Application started');
-	}
-
-	/**
-	 * Get a debugger object.
-	 *
-	 * @return  TrackerDebugger
-	 *
-	 * @since   1.0
-	 */
-	public function getDebugger()
-	{
-		return $this->debugger;
+		//$this->mark('Application started');
 	}
     
     /**
-     * function getContainer
-     */
+	 * Initialisation method.
+	 *
+	 * @return  void
+	 * @since   1.0
+	 */
+	protected function initialise()
+	{
+        // Load the configuration object.
+        $this->loadConfiguration();
+        
+        // Register the config to Factory
+        Factory::$config = $this->config;
+        
+        // Register components
+        $this->loadComponents();
+        
+        // Register the event dispatcher
+        $this->loadDispatcher();
+	}
+    
+    /**
+	 * Get the DI container.
+	 *
+	 * @return  Container
+	 *
+	 * @since   1.0
+	 *
+	 * @throws  \UnexpectedValueException May be thrown if the container has not been set.
+	 */
     public function getContainer()
     {
+        if($this->container && $this->container instanceof Container) {
+            return $this->container ;
+        }
+        
+        $this->setContainer(new Container);
+        
         return $this->container ;
+    }
+    
+    /**
+	 * Set the DI container.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @since   1.0
+	 */
+	public function setContainer(Container $container)
+    {
+        $this->container = $container ;
+    }
+    
+    /**
+     * System environment setter.
+     *
+     * @since   1.0
+     */
+    public function setEnvironment($env)
+    {
+        $this->environment = $env ;
+    }
+    
+    /**
+     * System environment getter.
+     *
+     * @return  string
+     * @since   1.0
+     */
+    public function getEnvironment()
+    {
+        return $this->environment ;
     }
 
 	/**
@@ -168,7 +227,10 @@ final class Application extends AbstractWebApplication
 	protected function doExecute()
 	{
 		try
-		{                    
+		{
+            // Load Components
+            
+            
 			// Instantiate the router
 			$router = new Router($this->input, $this);
 			$maps = json_decode(file_get_contents(JPATH_BASE . '/app/config/routes.json'));
@@ -254,7 +316,7 @@ final class Application extends AbstractWebApplication
 	{
 		if (JDEBUG)
 		{
-			$this->debugger->mark($text);
+            $this->getProfiler()->mark($text);
 		}
 
 		return $this;
@@ -271,33 +333,96 @@ final class Application extends AbstractWebApplication
 	private function loadConfiguration()
 	{
 		// Check for a custom configuration.
-		$type = getenv('JTRACKER_ENVIRONMENT');
+		$type = $this->getEnvironment();
 
 		$name = ($type) ? 'config.' . $type : 'config';
 
-		// Set the configuration file path for the application.
-		$file = JPATH_CONFIGURATION . '/' . $name . '.json';
-
-		// Verify the configuration exists and is readable.
-		if (!is_readable($file))
-		{
-			throw new \RuntimeException('Configuration file does not exist or is unreadable.');
-		}
-
-		// Load the configuration file into an object.
-		$config = json_decode(file_get_contents($file));
-
-		if ($config === null)
-		{
-			throw new \RuntimeException(sprintf('Unable to parse the configuration file %s.', $file));
-		}
-
-		$this->config->loadObject($config);
+		// Find the configuration file.
+        foreach( new \FilesystemIterator(JPATH_CONFIGURATION) as $file ) :
+            $fileName = $file->getFileName();
+            
+            if(strpos($fileName, $name) !== false) {
+                
+                // Verify the configuration exists and is readable.
+                if(!$file->isReadable())
+                {
+                    throw new \RuntimeException('Configuration file does not exist or is unreadable.');
+                }
+                
+                // Load the configuration file into Registry.
+                $result = $this->config->loadFile($file->getRealPath(), $file->getExtension());
+                
+                if (!$result)
+                {
+                    throw new \RuntimeException(sprintf('Unable to parse the configuration file %s.', $file));
+                }
+                
+                break;
+            }
+            
+        endforeach;
 
 		define('JDEBUG', $this->get('debug.system'));
-
+        
 		return $this;
 	}
+    
+    /**
+	 * Initialize the components and set them into container.
+	 *
+	 * @return  $this  Method allows chaining
+	 *
+	 * @since   1.0
+	 * @throws  \RuntimeException
+	 */
+	private function loadComponents()
+    {
+        // Get system environment name.
+        $type = $this->getEnvironment();
+        
+        // Set the component registration file name & path.
+		$name = ($type) ? 'components.' . $type : 'components';
+        
+        $filepath = JPATH_CONFIGURATION . '/' . $name . '.' . $this->config->get('system.config_type') ;
+        
+        // Load file.
+        $file = new \SplFileObject( $filepath );
+        
+        // Verify the file exists and is readable.
+        if(!$file->isReadable())
+        {
+            throw new \RuntimeException('Component registration file does not exist or is unreadable.');
+        }
+        
+        $components = json_decode(file_get_contents($filepath));
+        
+        if ($components === null)
+        {
+            throw new \RuntimeException(sprintf('Unable to parse the component registration file %s.', $filepath));
+        }
+        
+        $this->config->set('component', $components);
+        
+        
+        
+        // load components into DI Container
+        $container = $this->getContainer();
+        
+        foreach($components as $key => $name)
+        {
+            $class = 'Components\\' . ucfirst($name) . '\\' . ucfirst($name) . 'Component' ;
+            
+            // Check for the requested controller.
+            if (!class_exists($class) /*|| !is_subclass_of($class, 'Joomla\\App\\Component\\ComponentInterface')*/)
+            {
+                throw new \RuntimeException($class.' not found');
+            }
+            
+            $container->set('component.'.$key, new $class($this, $this->container));
+        }
+        
+        return $this;
+    }
 
 	/**
 	 * Enqueue a system message.
@@ -376,6 +501,23 @@ final class Application extends AbstractWebApplication
 
 		return $this->newSession;
 	}
+    
+    /**
+	 * Get a Profiler object.
+	 *
+	 * @return  Profiler
+	 *
+	 * @since   1.0
+	 */
+	public function getProfiler()
+    {
+        if(!$this->profiler)
+        {
+            $this->profiler = new Profiler('Application');
+        }
+        
+        return $this->profiler;
+    }
 
 	/**
 	 * Get a user object.
@@ -633,58 +775,4 @@ final class Application extends AbstractWebApplication
 
 		return $this;
 	}
-
-	/**
-	 * Get the current project.
-	 *
-	 * @param   boolean  $reload  Reload the project.
-	 *
-	 * @return  TrackerProject
-	 *
-	 * @since   1.0
-	 */
-	public function getProject($reload = false)
-	{
-		if (is_null($this->project) || $reload)
-		{
-			$this->loadProject($reload);
-		}
-
-		return $this->project;
-	}
-
-	/**
-	 * Get a GitHub object.
-	 *
-	 * @return  Github
-	 *
-	 * @since   1.0
-	 * @throws  \RuntimeException
-	 */
-	public function getGitHub()
-	{
-		$options = new Registry;
-
-		$token = $this->getSession()->get('gh_oauth_access_token');
-
-		if ($token)
-		{
-			$options->set('gh.token', $token);
-		}
-		else
-		{
-			$options->set('api.username', $this->get('github.username'));
-			$options->set('api.password', $this->get('github.password'));
-		}
-
-		// GitHub API works best with cURL
-		$transport = HttpFactory::getAvailableDriver($options, array('curl'));
-
-		$http = new Http($options, $transport);
-
-		// Instantiate Github
-		$gitHub = new Github($options, $http);
-
-		return $gitHub;
-    }
 }
