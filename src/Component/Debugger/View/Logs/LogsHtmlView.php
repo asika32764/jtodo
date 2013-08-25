@@ -4,10 +4,10 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Debugger\View\Logs;
+namespace Component\Debugger\View\Logs;
 
 use Joomla\Factory;
-use Components\Debugger\TrackerDebugger;
+use Component\Debugger\TrackerDebugger;
 use App\Joomla\View\AbstractTrackerHtmlView;
 
 /**

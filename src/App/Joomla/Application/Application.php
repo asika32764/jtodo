@@ -268,7 +268,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
             
             $component->parseRoute($segments, $router);
             
-            $router->setControllerPrefix('Components');
+            $router->setControllerPrefix('Component');
             
             $route = $route ?: '*';
             
@@ -281,7 +281,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
             
             /*
             //$router->addMaps($maps, true);
-            $router->setControllerPrefix('\\Components');
+            $router->setControllerPrefix('\\Component');
             $router->setDefaultController('\\Todo\\Controller\\CategoriesController');
             
             // Fetch the controller
@@ -463,7 +463,7 @@ throw new \RuntimeException("Authentication failure.");
         
         foreach($components as $key => $name)
         {
-            $class = 'Components\\' . ucfirst($name) . '\\' . ucfirst($name) . 'Component' ;
+            $class = 'Component\\' . ucfirst($name) . '\\' . ucfirst($name) . 'Component' ;
             
             // Check for the requested controller.
             if (!class_exists($class) /*|| !is_subclass_of($class, 'Joomla\\App\\Component\\ComponentInterface')*/)

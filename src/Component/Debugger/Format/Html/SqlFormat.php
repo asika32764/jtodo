@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Debugger\Format\Html;
+namespace Component\Debugger\Format\Html;
 
 /**
  * Class SqlFormat

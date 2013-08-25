@@ -6,10 +6,10 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Debugger\Database;
+namespace Component\Debugger\Database;
 
 use Joomla\Database\DatabaseDriver;
-use Components\Debugger\Format\Html\TableFormat;
+use Component\Debugger\Format\Html\TableFormat;
 
 /**
  * Class DatabaseDebugger.

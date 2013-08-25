@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Debugger\Handler;
+namespace Component\Debugger\Handler;
 
 use \Whoops\Handler\Handler;
 

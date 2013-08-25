@@ -4,7 +4,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Debugger;
+namespace Component\Debugger;
 
 use Joomla\Factory;
 use Joomla\Profiler\Profiler;
@@ -13,10 +13,10 @@ use Joomla\Utilities\ArrayHelper;
 use App\Joomla\Application\Application;
 use App\Joomla\Component\Component;
 
-use Components\Debugger\Database\DatabaseDebugger;
-use Components\Debugger\Format\Html\SqlFormat;
-use Components\Debugger\Format\Html\TableFormat;
-use Components\Debugger\Handler\ProductionHandler;
+use Component\Debugger\Database\DatabaseDebugger;
+use Component\Debugger\Format\Html\SqlFormat;
+use Component\Debugger\Format\Html\TableFormat;
+use Component\Debugger\Handler\ProductionHandler;
 
 use Kint;
 

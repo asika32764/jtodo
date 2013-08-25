@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace JTracker\View;
+namespace App\Joomla\View;
 
 use Joomla\Factory;
 use Joomla\Language\Text;
@@ -14,9 +14,9 @@ use Joomla\Model\ModelInterface;
 use Joomla\View\AbstractView;
 use Joomla\View\Renderer\RendererInterface;
 
-use JTracker\Application\TrackerApplication;
-use JTracker\Authentication\GitHub\GitHubLoginHelper;
-use JTracker\View\Renderer\TrackerExtension;
+use App\Joomla\Application\TrackerApplication;
+use App\Joomla\Authentication\GitHub\GitHubLoginHelper;
+use App\Joomla\View\Renderer\TrackerExtension;
 
 /**
  * Abstract HTML view class for the Tracker application

@@ -1,21 +1,21 @@
 <?php
 /**
- * Part of the Joomla Tracker's Debug Application
+ * Part of the Joomla Todo's Categories
  *
  * @copyright  Copyright (C) 2012 - 2013 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Debugger\Controller;
+namespace Component\Todo\Controller;
 
-use App\Joomla\Controller\AbstractTrackerController;
+use App\Joomla\Controller\Controller;
 
 /**
  * Controller class to display the application configuration
  *
  * @since  1.0
  */
-class LogsController extends AbstractTrackerController
+class CategoriesController extends Controller
 {
 	/**
 	 * The default view for the component
@@ -23,7 +23,7 @@ class LogsController extends AbstractTrackerController
 	 * @var    string
 	 * @since  1.0
 	 */
-	protected $defaultView = 'logs';
+	protected $defaultView = '';
 
 	/**
 	 * Execute the controller.
@@ -34,8 +34,6 @@ class LogsController extends AbstractTrackerController
 	 */
 	public function execute()
 	{
-		$this->getApplication()->getUser()->authorize('admin');
-
-		parent::execute();
+		return parent::execute();
 	}
 }

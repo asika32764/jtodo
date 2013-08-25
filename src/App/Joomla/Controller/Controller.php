@@ -29,7 +29,15 @@ abstract class Controller extends AbstractController
 	 * @since  1.0
 	 */
 	protected $defaultView;
-
+	
+	/**
+	 * The app being executed.
+	 *
+	 * @var    string
+	 * @since  1.0
+	 */
+	protected $component;
+	
 	/**
 	 * Constructor.
 	 *
@@ -41,6 +49,22 @@ abstract class Controller extends AbstractController
 	public function __construct(Input $input = null, AbstractApplication $app = null)
 	{
 		parent::__construct($input, $app);
+		
+		// Get the option from the input object
+		if (empty($this->component))
+		{
+			// Get the fully qualified class name for the current object
+			$fqcn = (get_class($this));
+
+			// Strip the base component namespace off
+			$className = str_replace('Component\\', '', $fqcn);
+
+			// Explode the remaining name into an array
+			$classArray = explode('\\', $className);
+
+			// Set the component as the first object in this array
+			$this->component = $classArray[0];
+		}
 	}
 
 	/**
@@ -55,8 +79,6 @@ abstract class Controller extends AbstractController
 	 */
 	public function execute()
 	{
-		echo 'Executed';
-		/*
 		// Get the input
 		$input = $this->getInput();
 
@@ -67,7 +89,7 @@ abstract class Controller extends AbstractController
 
 		$input->set('view', $vName);
 
-		$base   = '\\Components\\';
+		$base   = '\\Component\\' . ucfirst($this->component);
 
 		$vClass = $base . '\\View\\' . ucfirst($vName) . '\\' . ucfirst($vName) . ucfirst($vFormat) . 'View';
 		$mClass = $base . '\\Model\\' . ucfirst($vName) . 'Model';
@@ -124,6 +146,14 @@ abstract class Controller extends AbstractController
 		}
 
 		return;
-		*/
+		
+	}
+	
+	/**
+	 * function render
+	 */
+	public function render($view, $type, $component)
+	{
+		
 	}
 }

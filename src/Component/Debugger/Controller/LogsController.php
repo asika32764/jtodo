@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Components\Debugger\Controller;
+namespace Component\Debugger\Controller;
 
 use App\Joomla\Controller\AbstractTrackerController;
 
@@ -15,7 +15,7 @@ use App\Joomla\Controller\AbstractTrackerController;
  *
  * @since  1.0
  */
-class DebugController extends AbstractTrackerController
+class LogsController extends AbstractTrackerController
 {
 	/**
 	 * The default view for the component
@@ -23,7 +23,7 @@ class DebugController extends AbstractTrackerController
 	 * @var    string
 	 * @since  1.0
 	 */
-	protected $defaultView = 'debug';
+	protected $defaultView = 'logs';
 
 	/**
 	 * Execute the controller.

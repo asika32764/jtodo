@@ -17,7 +17,7 @@ use Joomla\Model\ModelInterface;
  *
  * @since  1.0
  */
-class DefaultView  extends AbstractHtmlView
+class View  extends AbstractHtmlView
 {
 	/**
 	 * Method to instantiate the view.
