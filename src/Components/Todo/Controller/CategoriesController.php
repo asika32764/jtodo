@@ -8,14 +8,14 @@
 
 namespace Components\Todo\Controller;
 
-use App\Joomla\Controller\AbstractController;
+use App\Joomla\Controller\Controller;
 
 /**
  * Controller class to display the application configuration
  *
  * @since  1.0
  */
-class CategoriesController extends AbstractController
+class CategoriesController extends Controller
 {
 	/**
 	 * The default view for the component

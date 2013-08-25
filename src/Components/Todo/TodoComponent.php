@@ -9,7 +9,7 @@ namespace Components\Todo;
 use Joomla\Factory;
 
 use App\Joomla\Application\Application;
-use App\Joomla\Component\AbstractComponent as Component;
+use App\Joomla\Component\Component;
 
 
 /**

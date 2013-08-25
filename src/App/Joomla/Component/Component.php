@@ -13,7 +13,7 @@ use Joomla\Router\Router;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\DI\Container;
 
-abstract class AbstractComponent implements ComponentInterface, ServiceProviderInterface
+abstract class Component implements ComponentInterface, ServiceProviderInterface
 {
     /**
      * Component name.

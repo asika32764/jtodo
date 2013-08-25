@@ -9,7 +9,7 @@
 namespace App\Joomla\Controller;
 
 use Joomla\Application\AbstractApplication;
-use Joomla\Controller\AbstractController as AbstractControllerBase;
+use Joomla\Controller\AbstractController;
 use Joomla\Input\Input;
 use Joomla\Log\Log;
 //use JTracker\Application\TrackerApplication;
@@ -20,7 +20,7 @@ use Joomla\Log\Log;
  *
  * @since  1.0
  */
-abstract class AbstractController extends AbstractControllerBase
+abstract class Controller extends AbstractController
 {
 	/**
 	 * The default view for the app

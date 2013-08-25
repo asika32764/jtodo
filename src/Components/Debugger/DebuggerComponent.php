@@ -11,7 +11,7 @@ use Joomla\Profiler\Profiler;
 use Joomla\Utilities\ArrayHelper;
 
 use App\Joomla\Application\Application;
-use App\Joomla\Component\AbstractComponent;
+use App\Joomla\Component\Component;
 
 use Components\Debugger\Database\DatabaseDebugger;
 use Components\Debugger\Format\Html\SqlFormat;
@@ -37,7 +37,7 @@ use Whoops\Run;
  *
  * @since  1.0
  */
-class DebuggerComponent extends AbstractComponent implements LoggerAwareInterface
+class DebuggerComponent extends Component implements LoggerAwareInterface
 {
 	/**
 	 * @var    array
