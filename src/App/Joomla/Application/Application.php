@@ -235,19 +235,19 @@ final class Application extends AbstractWebApplication implements ContainerAware
             // Get URI route from config
             $route = $this->get('uri.route');
             
-            // Get component name from route.
-            $segments       = explode('/', $route);
-            $componentName  = array_shift($segments);
+            // Get base routing file
+            $maps    = json_decode(file_get_contents(JPATH_CONFIGURATION . '/routing.json'));
             
-            // Get component routing file
-            $baseRouting    = json_decode(file_get_contents(JPATH_CONFIGURATION . '/routing.json'));
+            // Find base routing and component routing
+            $componentName = null;
             
-            // Find component routing
-            foreach((array)$baseRouting as $routing)
+            foreach((array)$maps as $map)
             {
-                if($routing->pattern == $componentName)
+                if(strpos($map->pattern, $route) !== false && !$componentName)
                 {
-                    $componentName = $routing->component ;
+                    $componentName = $map->component ;
+                    
+                    $route = substr($route, strlen($map->pattern));
                     
                     break;
                 }
@@ -257,10 +257,12 @@ final class Application extends AbstractWebApplication implements ContainerAware
             $component = $this->container->get('component.' . $componentName);
             
             // Parse route
+            $segments = explode('/', $route);
+            
             $component->parseRoute($segments, $router);
+            
             $router->setControllerPrefix('Components');
             
-            $route = implode('/', $segments);
             $route = $route ?: '*';
             
             $controller = $router->getController($route);

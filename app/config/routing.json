@@ -1,12 +1,13 @@
 {
     "_default" : 
-        {
-            "pattern" : "",
-            "component" : "todo"
-        },
+    {
+        "pattern" : "",
+        "component" : "todo"
+    },
+        
     "component_todo" : 
-        {
-            "pattern" : "todo",
-            "component" : "todo"
-        }
+    {
+        "pattern" : "todo",
+        "component" : "todo"
+    }
 }
