@@ -228,36 +228,43 @@ final class Application extends AbstractWebApplication implements ContainerAware
     {
         try
         {
-            // Load Components
-            
-            
             // Instantiate the router
             $router = new Router($this->input, $this);
             $this->container->set('system.router', $router);
             
+            // Get URI route from config
             $route = $this->get('uri.route');
             
-            $segments = explode('/', $route);
-            $componentName = array_shift($segments);
-            $component = $this->container->get('component.' . $componentName);
+            // Get component name from route.
+            $segments       = explode('/', $route);
+            $componentName  = array_shift($segments);
             
+            // Get component routing file
+            $baseRouting    = json_decode(file_get_contents(JPATH_CONFIGURATION . '/routing.json'));
             
-            
-            
-            
-            $maps = json_decode(file_get_contents(JPATH_CONFIGURATION . '/routes.json'));
-            
-            if (!$maps)
+            // Find component routing
+            foreach((array)$baseRouting as $routing)
             {
-                throw new \RuntimeException('Invalid router file.', 500);
+                if($routing->pattern == $componentName)
+                {
+                    $componentName = $routing->component ;
+                    
+                    break;
+                }
             }
             
-            $router->addMaps($maps, true);
-            $component->parseRoute($segments);
+            // Get component from container
+            $component = $this->container->get('component.' . $componentName);
+            
+            // Parse route
+            $component->parseRoute($segments, $router);
             $router->setControllerPrefix('Components');
             
-            $controller = $router->getController(implode('/', $segments));
-            //show($controller);
+            $route = implode('/', $segments);
+            $route = $route ?: '*';
+            
+            $controller = $router->getController($route);
+            
             echo $controller->execute();
             
             

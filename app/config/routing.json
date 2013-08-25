@@ -1,0 +1,12 @@
+{
+    "_default" : 
+        {
+            "pattern" : "",
+            "component" : "todo"
+        },
+    "component_todo" : 
+        {
+            "pattern" : "todo",
+            "component" : "todo"
+        }
+}

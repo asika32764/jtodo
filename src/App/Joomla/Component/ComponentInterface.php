@@ -8,6 +8,8 @@
 
 namespace App\Joomla\Component;
 
+use Joomla\Router\Router;
+
 interface ComponentInterface
 {
     /**
@@ -37,7 +39,7 @@ interface ComponentInterface
      *
      * @since   1.0
      */
-    public function parseRoute($segments);
+    public function parseRoute($segments, Router $router);
     
     /**
      * Build query to uri.
@@ -48,5 +50,20 @@ interface ComponentInterface
      *
      * @since   1.0
      */
-    public function buildRoute($query);
+    public function buildRoute($query, Router $router);
+    
+    /**
+     * function getPath
+     */
+    public function getPath();
+    
+    /**
+     * function setDefaultController
+     */
+    public function setDefaultController($name);
+    
+    /**
+     * function getDefaultController
+     */
+    public function getDefaultController();
 }

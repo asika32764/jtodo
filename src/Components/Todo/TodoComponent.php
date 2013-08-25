@@ -19,5 +19,11 @@ use App\Joomla\Component\AbstractComponent as Component;
  */
 class TodoComponent extends Component
 {
-    
+    /**
+     * Default controller name.
+     *
+     * @var string
+     * @since 1.0
+     */
+    protected $defaultController = 'Categories' ;
 }

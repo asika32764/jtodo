@@ -9,6 +9,7 @@
 namespace App\Joomla\Component;
 
 use App\Joomla\Application\Application;
+use Joomla\Router\Router;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\DI\Container;
 
@@ -21,6 +22,14 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
      * @since 1.0
      */
     protected $name = null ;
+    
+    /**
+     * Default controller name.
+     *
+     * @var string
+     * @since 1.0
+     */
+    protected $defaultController = null ;
     
     /**
 	 * @var    Application
@@ -96,6 +105,53 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
     }
     
     /**
+     * function setDefaultController
+     */
+    public function setDefaultController($name)
+    {
+        $this->defaultController = $name;
+    }
+    
+    /**
+     * function getDefaultController
+     */
+    public function getDefaultController()
+    {
+        // If default controller has not been setted, find a controller.
+        if(!$this->defaultController)
+        {
+            $ctrls = new \FilesystemIterator($this->getPath() . '/Controller');
+            
+            foreach($ctrls as $ctrl)
+            {
+                $ctrlName = $ctrl->getFilename();
+                
+                if($strpos('Controller', $ctrlName) !== false)
+                {
+                    $ctrlName = str_replace('Controller', '', $ctrlName);
+                    $this->setDefaultController(ucfirst($ctrlName));
+                    break;
+                }
+            }
+            
+            if(!$this->defaultController)
+            {
+                throw new \RuntimeException('No Controller found.');
+            }
+        }
+        
+        return $this->defaultController;
+    }
+    
+    /**
+     * function getPath
+     */
+    public function getPath()
+    {
+        return JPATH_SOURCE . '/Components/' . ucfirst($this->getName());
+    }
+    
+    /**
      * Parse uri segments as route.
      *
      * @param   string  $segments   URI segments.
@@ -104,12 +160,25 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
      *
      * @since   1.0
      */
-    public function parseRoute($segments)
+    public function parseRoute($segments, Router $router)
     {
         $controller = array_shift($segments);
-        //$controller = '\\' . ucfirst($this->getName()) . '\\Controller\\' . ucfirst($controller) . 'Controller' ;
-        $this->getRouterMapping($controller);
+        $controller = $controller ?: $this->getDefaultController();
         
+        $maps = json_decode(file_get_contents($this->getPath() . '/Config/routing.json'));
+        
+        if (!$maps)
+        {
+            throw new \RuntimeException('Invalid router file.', 500);
+        }
+        
+        foreach((array)$maps as $map)
+        {
+            $router->addMap($map->pattern, $map->controller);
+        }
+        
+        // Get default routes if not any route setting matchs.
+        $this->parseDefaultRoute($controller, $router);
     }
     
     /**
@@ -121,7 +190,7 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
      *
      * @since   1.0
      */
-    public function buildRoute($query)
+    public function buildRoute($query, Router $router)
     {
         
     }
@@ -129,26 +198,45 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
     /**
      * function getRouterConfig
      */
-    public function getRouterMapping($defaultController)
+    public function getRouting($defaultController, Router $router)
     {
         $file       = __DIR__.'/Routing/routing.json';
-        $mapping    = json_decode(file_get_contents($file));
+        $maps    = json_decode(file_get_contents($file));
         
-        $router = $this->container->get('system.router');
-        
-        foreach($mapping->_default as $routing)
+        foreach($maps as $map)
         {
             $replace = array(
                 '{:component}'  => ucfirst($this->getName()),
                 '{:controller}' =>  ucfirst($defaultController)
             );
             
-            $controller = strtr($routing->controller, $replace);
+            $controller = strtr($map->controller, $replace);
             
-            $router->addMap($routing->pattern, $controller);
+            $router->addMap($map->pattern, $controller);
         }
         
         
         //show($router);die;
+    }
+    
+    /**
+     * function getDefaultRouting
+     */
+    public function parseDefaultRoute($defaultController, Router $router)
+    {
+        $file       = __DIR__.'/Routing/routing.json';
+        $maps    = json_decode(file_get_contents($file));
+        
+        foreach((array)$maps as $map)
+        {
+            $replace = array(
+                '{:component}'  => ucfirst($this->getName()),
+                '{:controller}' =>  ucfirst($defaultController)
+            );
+            
+            $controller = strtr($map->controller, $replace);
+            
+            $router->addMap($map->pattern, $controller);
+        }
     }
 }

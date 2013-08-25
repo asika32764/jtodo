@@ -1,6 +1,11 @@
 {
-    "categories" : "\\Todo\\Controller\\CategoriesController" ,
-    "todo" : "\\Todo\\Controller\\TodoController" ,
-    "ggg/:bbb" : "ewlthjt" ,
-    "asdasd/asd/:alias" : "sadewr"
+    "todo_categories" : {
+        "pattern" : "categories" ,
+        "controller" : "\\Todo\\Controller\\CategoriesController"
+    },
+    
+    "todo_ggg" : {
+        "pattern" : "ggg" ,
+        "controller" : "\\Todo\\Controller\\GggController"
+    }
 }
