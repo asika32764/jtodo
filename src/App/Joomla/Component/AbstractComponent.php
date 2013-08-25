@@ -198,7 +198,7 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
     /**
      * function getRouterConfig
      */
-    public function getRouting($defaultController, Router $router)
+    public function getRouting($controller, Router $router)
     {
         $file       = __DIR__.'/Routing/routing.json';
         $maps    = json_decode(file_get_contents($file));
@@ -207,7 +207,7 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
         {
             $replace = array(
                 '{:component}'  => ucfirst($this->getName()),
-                '{:controller}' =>  ucfirst($defaultController)
+                '{:controller}' =>  ucfirst($controller)
             );
             
             $controller = strtr($map->controller, $replace);

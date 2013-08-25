@@ -243,11 +243,18 @@ final class Application extends AbstractWebApplication implements ContainerAware
             
             foreach((array)$maps as $map)
             {
-                if(strpos($map->pattern, $route) !== false && !$componentName)
+                // Set * to '' ;
+                $map->pattern = ($map->pattern == '*') ? '' : $map->pattern;
+                $map->pattern;
+                // Add separator before route & pattern beacuse strpos() can not use empty string as params.
+                $route          = '/' . $route ;
+                $map->pattern   = '/' . $map->pattern;
+                
+                if(strpos($route, $map->pattern) !== false && !$componentName)
                 {
                     $componentName = $map->component ;
                     
-                    $route = substr($route, strlen($map->pattern));
+                    $route = trim( substr($route, strlen($map->pattern) + 1 ), '/');
                     
                     break;
                 }
@@ -329,7 +336,7 @@ throw new \RuntimeException("Authentication failure.");
         }
         catch (\InvalidArgumentException $exception)
         {
-            throw new \RuntimeException("Component {$componentName} not found.");
+            throw new \RuntimeException($exception->getMessage());
         }
         catch (\Exception $exception)
         {
