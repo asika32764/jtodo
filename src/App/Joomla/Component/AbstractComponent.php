@@ -124,15 +124,15 @@ abstract class AbstractComponent implements ComponentInterface, ServiceProviderI
             
             foreach($ctrls as $ctrl)
             {
-                $ctrlName = $ctrl->getFilename();
+                $ctrlName = $ctrl->getBasename('.' . $ctrl->getExtension());
                 
-                if($strpos('Controller', $ctrlName) !== false)
+                if(strpos($ctrlName, 'Controller') !== false)
                 {
                     $ctrlName = str_replace('Controller', '', $ctrlName);
                     $this->setDefaultController(ucfirst($ctrlName));
                     break;
                 }
-            }
+            }$this->defaultController;
             
             if(!$this->defaultController)
             {
