@@ -6,19 +6,19 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace JTracker\View\Renderer;
+namespace App\Joomla\View\Renderer;
 
 use Joomla\Factory;
 use Joomla\Language\Text;
 
-use JTracker\Application\TrackerApplication;
+use App\Joomla\Application\Application;
 
 /**
  * Twig extension class
  *
  * @since  1.0
  */
-class TrackerExtension extends \Twig_Extension
+class AppExtension extends \Twig_Extension
 {
 	/**
 	 * Returns the name of the extension.

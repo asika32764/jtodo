@@ -11,19 +11,18 @@ namespace App\Joomla\View;
 use Joomla\Factory;
 use Joomla\Language\Text;
 use Joomla\Model\ModelInterface;
-use Joomla\View\AbstractView;
 use Joomla\View\Renderer\RendererInterface;
 
+use App\Joomla\View\AbstractView;
 use App\Joomla\Application\TrackerApplication;
-use App\Joomla\Authentication\GitHub\GitHubLoginHelper;
-use App\Joomla\View\Renderer\TrackerExtension;
+use App\Joomla\View\Renderer\AppExtension;
 
 /**
  * Abstract HTML view class for the Tracker application
  *
  * @since  1.0
  */
-abstract class AbstractTrackerHtmlView extends AbstractView
+abstract class HtmlView extends AbstractView
 {
 	/**
 	 * The view layout.
@@ -50,16 +49,16 @@ abstract class AbstractTrackerHtmlView extends AbstractView
 	 * @throws  \RuntimeException
 	 * @since   1.0
 	 */
-	public function __construct(ModelInterface $model, $templatesPaths = '')
+	public function __construct()
 	{
-		parent::__construct($model);
+		parent::__construct();
 
 		/* @type TrackerApplication $app */
 		$app = Factory::$application;
 
 		$renderer = $app->get('renderer.type');
 
-		$className = 'JTracker\\View\\Renderer\\' . ucfirst($renderer);
+		$className = 'App\\Joomla\\View\\Renderer\\' . ucfirst($renderer);
 
 		// Check if the specified renderer exists in the application
 		if (false == class_exists($className))
@@ -108,7 +107,7 @@ abstract class AbstractTrackerHtmlView extends AbstractView
 		$this->renderer = new $className($config);
 
 		// Register tracker's extension.
-		$this->renderer->addExtension(new TrackerExtension);
+		$this->renderer->addExtension(new AppExtension);
 
 		// Register additional paths.
 		if (!empty($templatesPaths))
@@ -116,26 +115,14 @@ abstract class AbstractTrackerHtmlView extends AbstractView
 			$this->renderer->setTemplatesPaths($templatesPaths, true);
 		}
 
-		$gitHubHelper = new GitHubLoginHelper($app->get('github.client_id'), $app->get('github.client_secret'));
+		//$gitHubHelper = new GitHubLoginHelper($app->get('github.client_id'), $app->get('github.client_secret'));
 
-		$this->renderer
-			->set('loginUrl', $gitHubHelper->getLoginUri())
-			->set('user', $app->getUser());
+		//$this->renderer
+			//->set('user', $app->getUser());
 
 		// Retrieve and clear the message queue
 		$this->renderer->set('flashBag', $app->getMessageQueue());
 		$app->clearMessageQueue();
-
-		// Add build commit if available
-		if (file_exists(JPATH_BASE . '/current_SHA'))
-		{
-			$data = trim(file_get_contents(JPATH_BASE . '/current_SHA'));
-			$this->renderer->set('buildSHA', $data);
-		}
-		else
-		{
-			$this->renderer->set('buildSHA', '');
-		}
 	}
 
 	/**

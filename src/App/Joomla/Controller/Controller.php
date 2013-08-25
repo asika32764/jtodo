@@ -8,6 +8,7 @@
 
 namespace App\Joomla\Controller;
 
+use Joomla\Factory;
 use Joomla\Application\AbstractApplication;
 use Joomla\Controller\AbstractController;
 use Joomla\Input\Input;
@@ -48,6 +49,11 @@ abstract class Controller extends AbstractController
 	 */
 	public function __construct(Input $input = null, AbstractApplication $app = null)
 	{
+		if(!$app)
+		{
+			$app = Factory::$application;
+		}
+		
 		parent::__construct($input, $app);
 		
 		// Get the option from the input object
@@ -65,6 +71,11 @@ abstract class Controller extends AbstractController
 			// Set the component as the first object in this array
 			$this->component = $classArray[0];
 		}
+		
+		// Set Controller name
+		$ref = new \ReflectionClass($this);
+
+        $this->name = str_replace('controller', '', strtolower($ref->getShortName()));;
 	}
 
 	/**
@@ -83,39 +94,39 @@ abstract class Controller extends AbstractController
 		$input = $this->getInput();
 
 		// Get some data from the request
-		$vName   = $input->getWord('view', $this->defaultView);
+		$vName   = $input->getWord('view', $this->getDefaultView());
 		$vFormat = $input->getWord('format', 'html');
 		$lName   = $input->getCmd('layout', 'index');
 
 		$input->set('view', $vName);
 
-		$base   = '\\Component\\' . ucfirst($this->component);
+		$base   = 'Component\\' . ucfirst($this->component);
 
 		$vClass = $base . '\\View\\' . ucfirst($vName) . '\\' . ucfirst($vName) . ucfirst($vFormat) . 'View';
-		$mClass = $base . '\\Model\\' . ucfirst($vName) . 'Model';
-
-		// If a model doesn't exist for our view, revert to the default model
-		if (!class_exists($mClass))
-		{
-			$mClass = $base . '\\Model\\DefaultModel';
-
-			// If there still isn't a class, panic.
-			if (!class_exists($mClass))
-			{
-				throw new \RuntimeException(sprintf('No model found for view %s or a default model for %s', $vName, $this->component));
-			}
-		}
+		//$mClass = $base . '\\Model\\' . ucfirst($vName) . 'Model';
+		//
+		//// If a model doesn't exist for our view, revert to the default model
+		//if (!class_exists($mClass))
+		//{
+		//	$mClass = $base . '\\Model\\DefaultModel';
+		//
+		//	// If there still isn't a class, panic.
+		//	if (!class_exists($mClass))
+		//	{
+		//		throw new \RuntimeException(sprintf('No model found for view %s or a default model for %s', $vName, $this->component));
+		//	}
+		//}
 
 		// Make sure the view class exists, otherwise revert to the default
 		if (!class_exists($vClass))
 		{
-			$vClass = '\\JTracker\\View\\TrackerDefaultView';
+			//$vClass = '\\JTracker\\View\\TrackerDefaultView';
 
 			// If there still isn't a class, panic.
-			if (!class_exists($vClass))
-			{
+			//if (!class_exists($vClass))
+			//{
 				throw new \RuntimeException(sprintf('Class %s not found', $vClass));
-			}
+			//}
 		}
 
 		// Register the templates paths for the view
@@ -123,7 +134,7 @@ abstract class Controller extends AbstractController
 
 		$sub = ('php' == $this->getApplication()->get('renderer.type')) ? '/php' : '';
 
-		$path = JPATH_TEMPLATES . $sub . '/' . strtolower($this->component);
+		$path = '';//JPATH_TEMPLATES . $sub . '/' . strtolower($this->component);
 
 		if (is_dir($path))
 		{
@@ -131,19 +142,18 @@ abstract class Controller extends AbstractController
 		}
 
 		
-		$view = new $vClass(new $mClass, $paths);
+		$view = new $vClass();
 		$view->setLayout($vName . '.' . $lName);
 
-		try
-		{
+		//try
+		//{
 			// Render our view.
 			echo $view->render();
-		}
-		catch (\Exception $e)
-		{
-			echo $this->getApplication()->getDebugger()
-				->renderException($e);
-		}
+		//}
+		//catch (\Exception $e)
+		//{
+		//	echo $this->getApplication()->getDebugger()->renderException($e);
+		//}
 
 		return;
 		
@@ -155,5 +165,26 @@ abstract class Controller extends AbstractController
 	public function render($view, $type, $component)
 	{
 		
+	}
+	
+	/**
+	 * function getDefaultView
+	 */
+	public function getDefaultView()
+	{
+		if($this->defaultView)
+		{
+			return $this->defaultView ;
+		}
+		
+		return $this->defaultView = $this->getName();
+	}
+	
+	/**
+	 * function getName
+	 */
+	public function getName()
+	{
+		return $this->name;
 	}
 }

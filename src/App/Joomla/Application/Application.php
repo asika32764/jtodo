@@ -226,8 +226,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
      */
     protected function doExecute()
     {
-        try
-        {
+        
             // Instantiate the router
             $router = new Router($this->input, $this);
             $this->container->set('system.router', $router);
@@ -300,6 +299,8 @@ final class Application extends AbstractWebApplication implements ContainerAware
 
             $this->setBody($contents);
             */
+        try
+        {
         }
         catch (AuthenticationException $exception)
         {
@@ -455,8 +456,6 @@ throw new \RuntimeException("Authentication failure.");
         }
         
         $this->config->set('component', $components);
-        
-        
         
         // load components into DI Container
         $container = $this->getContainer();

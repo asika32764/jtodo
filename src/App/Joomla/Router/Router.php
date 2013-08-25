@@ -73,6 +73,4 @@ class Router extends RouterBase
 			throw new RoutingException($e->getMessage());
 		}
 	}
-
-
 }

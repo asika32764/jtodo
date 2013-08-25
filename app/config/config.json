@@ -5,7 +5,9 @@
     
     "debug" : {
         "system" : true
+    },
+    
+    "renderer" : {
+        "type" : "twig"
     }
-    
-    
 }
