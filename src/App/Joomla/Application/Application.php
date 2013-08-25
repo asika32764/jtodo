@@ -324,7 +324,7 @@ throw new \RuntimeException("Authentication failure.");
             $this->mark('Application terminated with a ROUTING EXCEPTION');
 
             $context = JDEBUG ? array('message' => $exception->getRawRoute()) : array();
-            throw new \RuntimeException("HTTP/1.1 404 Not Found.");
+            throw new \RuntimeException($exception->getMessage());
             $this->setBody($this->debugger->renderException($exception, $context));
         }
         catch (\InvalidArgumentException $exception)
@@ -334,9 +334,9 @@ throw new \RuntimeException("Authentication failure.");
         catch (\Exception $exception)
         {
             header('HTTP/1.1 500 Internal Server Error', true, 500);
-
+            
             $this->mark('Application terminated with an EXCEPTION');
-            throw new \RuntimeException("HTTP/1.1 500 Internal Server Error");
+            throw new \RuntimeException($exception->getMessage());
             $this->setBody($this->container->get('component.debugger')->renderException($exception));
         }
     }
