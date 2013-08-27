@@ -149,8 +149,6 @@ abstract class Controller extends AbstractController
         $input->set('view', $vName);
 
         $base   = $this->nameSpace . ucfirst($this->component);
-
-        $vClass = $base . '\\View\\' . ucfirst($vName) . '\\' . ucfirst($vName) . ucfirst($vFormat) . 'View';
         //$mClass = $base . '\\Model\\' . ucfirst($vName) . 'Model';
         //
         //// If a model doesn't exist for our view, revert to the default model
@@ -165,21 +163,11 @@ abstract class Controller extends AbstractController
         //    }
         //}
 
-        // Make sure the view class exists, otherwise revert to the default
-        if (!class_exists($vClass))
-        {
-            //$vClass = '\\JTracker\\View\\TrackerDefaultView';
-
-            // If there still isn't a class, panic.
-            //if (!class_exists($vClass))
-            //{
-                throw new \RuntimeException(sprintf('Class %s not found', $vClass));
-            //}
-        }
-
         
         $view = $this->getView($vName, $vFormat);
-        $view->setLayout($vName . '.' . $lName);
+        //$view->setLayout($vName . '.' . $lName);
+        
+        $model = $this->getModel($vName);
         
         //try
         //{
@@ -315,50 +303,6 @@ abstract class Controller extends AbstractController
     }
     
     /**
-     * Adds to the search path for templates and resources.
-     *
-     * @param   string  $type  The path type (e.g. 'model', 'view').
-     * @param   mixed   $path  The directory string  or stream array to search.
-     *
-     * @return  Controller  A Controller object to support chaining.
-     *
-     * @since   1.0
-     */
-    protected function addPath($type, $path)
-    {
-        if (!isset($this->paths[$type]))
-        {
-            $this->paths[$type] = array();
-        }
- 
-        // Loop through the path directories
-        foreach ((array) $path as $dir)
-        {
-            // No surrounding spaces allowed!
-            $dir = rtrim(Path::check($dir, '/'), '/') . '/';
- 
-            // Add to the top of the search dirs
-            array_unshift($this->paths[$type], $dir);
-        }
- 
-        return $this;
-    }
-    
-    /**
-     * Add one or more view paths to the controller's stack, in LIFO order.
-     *
-     * @param   mixed  $path  The directory (string) or list of directories (array) to add.
-     *
-     * @return  Controller  This object to support chaining.
-     */
-    public function addViewPath($path)
-    {
-        $this->addPath('view', $path);
- 
-        return $this;
-    }
-    
-    /**
      * Method to get a reference to the current view and load it if necessary.
      *
      * @param   string  $name    The view name. Optional, defaults to the controller name.
@@ -371,7 +315,7 @@ abstract class Controller extends AbstractController
      *
      * @since   1.0
      */
-    public function getView($name = '', $type = '', $prefix = '', $config = array())
+    public function getView($name = '', $type = '', $nameSpace = '', $config = array())
     {
         static $views;
  
@@ -430,12 +374,11 @@ abstract class Controller extends AbstractController
     {
         // Clean the view name
         $viewName        = preg_replace('/[^A-Z0-9_]/i', '', $name);
-        $viewNameSpace   = preg_replace('/[^A-Z0-9_]/i', '', $nameSpace);
         $viewType        = preg_replace('/[^A-Z0-9_]/i', '', $type);
  
         // Build the view class name
         $viewClass = ucfirst($nameSpace) . ucfirst($this->component) . '\\View\\' .
-                     ucfirst($viewNameSpace) . '\\' . ucfirst($viewName) . ucfirst($viewType) . 'View'
+                     ucfirst($viewName) . '\\' . ucfirst($viewName) . ucfirst($viewType) . 'View'
                      ;
  
         if (!class_exists($viewClass))
@@ -444,5 +387,79 @@ abstract class Controller extends AbstractController
         }
  
         return new $viewClass();
+    }
+    
+    /**
+     * Method to get a model object, loading it if required.
+     *
+     * @param   string  $name    The model name. Optional.
+     * @param   string  $prefix  The class prefix. Optional.
+     * @param   array   $config  Configuration array for model. Optional.
+     *
+     * @return  object  The model.
+     *
+     * @since   1.0
+     */
+    public function getModel($name = '', $nameSpace = '', $config = array())
+    {
+        if (empty($name))
+        {
+            $name = $this->getName();
+        }
+ 
+        if (empty($nameSpace))
+        {
+            $nameSpace = $this->getNamespace();
+        }
+ 
+        if ($model = $this->createModel($name, $nameSpace, $config))
+        {
+            return false;
+        }
+        return $model;
+    }
+    
+    /**
+     * Method to load and return a model object.
+     *
+     * @param   string  $name    The name of the model.
+     * @param   string  $prefix  Optional model prefix.
+     * @param   array   $config  Configuration array for the model. Optional.
+     *
+     * @return  mixed   Model object on success; otherwise null failure.
+     *
+     * @since   1.0
+     */
+    protected function createModel($name, $nameSpace = '', $config = array())
+    {
+        // Clean the model name
+        $modelName   = preg_replace('/[^A-Z0-9_]/i', '', $name);
+ 
+        // Build the model class name
+        $modelClass = ucfirst($nameSpace) . ucfirst($this->component) . '\\Model\\' . ucfirst($modelName) . 'Model';
+ 
+        if (!class_exists($modelClass))
+        {
+            throw new \RuntimeException('Model Class ' . $modelClass . ' Not found.');
+        }
+ 
+        return new $modelClass();
+    }
+    
+    /**
+     * Method to get the controller namespace
+     *
+     * @return  string  The namespace of component
+     *
+     * @since   1.0
+     */
+    public function getNamespace()
+    {
+        if (empty($this->nameSpace))
+        {
+            throw new \RuntimeException('Namespace not setted.');
+        }
+ 
+        return $this->nameSpace;
     }
 }
