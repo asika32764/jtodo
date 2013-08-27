@@ -13,6 +13,7 @@ use Joomla\Application\AbstractApplication;
 use Joomla\Controller\AbstractController;
 use Joomla\Input\Input;
 use Joomla\Log\Log;
+use Joomla\Filesystem\Path;
 //use JTracker\Application\TrackerApplication;
 //use JTracker\View\AbstractTrackerHtmlView;
 
@@ -23,168 +24,425 @@ use Joomla\Log\Log;
  */
 abstract class Controller extends AbstractController
 {
-	/**
-	 * The default view for the app
-	 *
-	 * @var    string
-	 * @since  1.0
-	 */
-	protected $defaultView;
-	
-	/**
-	 * The app being executed.
-	 *
-	 * @var    string
-	 * @since  1.0
-	 */
-	protected $component;
-	
-	/**
-	 * Constructor.
-	 *
-	 * @param   Input                $input  The input object.
-	 * @param   AbstractApplication  $app    The application object.
-	 *
-	 * @since   1.0
-	 */
-	public function __construct(Input $input = null, AbstractApplication $app = null)
-	{
-		if(!$app)
-		{
-			$app = Factory::$application;
-		}
-		
-		parent::__construct($input, $app);
-		
-		// Get the option from the input object
-		if (empty($this->component))
-		{
-			// Get the fully qualified class name for the current object
-			$fqcn = (get_class($this));
+    /**
+     * The default view for the app
+     *
+     * @var    string
+     * @since  1.0
+     */
+    protected $defaultView;
+    
+    /**
+     * The Component Name.
+     *
+     * @var    string
+     * @since  1.0
+     */
+    protected $component;
+    
+    /**
+     * The Component namespace prefix of every classes.
+     *
+     * @var    string
+     * @since  1.0
+     */
+    protected $nameSpace = 'Component\\';
+    
+    /**
+     * The name of the controller
+     *
+     * @var    array 
+     * @since  1.0
+     */
+    protected $name;
+    
+    /**
+     * The base path of the controller
+     *
+     * @var    string 
+     * @since  1.0
+     */
+    protected $basePath;
+    
+    /**
+     * Redirect message.
+     *
+     * @var    string 
+     * @since  1.0
+     */
+    protected $message;
+ 
+    /**
+     * Redirect message type.
+     *
+     * @var    string 
+     * @since  1.0
+     */
+    protected $messageType;
+    
+    /**
+     * Constructor.
+     *
+     * @param   Input                $input  The input object.
+     * @param   AbstractApplication  $app    The application object.
+     *
+     * @since   1.0
+     */
+    public function __construct(Input $input = null, AbstractApplication $app = null)
+    {
+        if(!$app)
+        {
+            $app = Factory::$application;
+        }
+        
+        parent::__construct($input, $app);
+        
+        // Get the fully qualified class name for the current object
+        $fqcn = (get_class($this));
 
-			// Strip the base component namespace off
-			$className = str_replace('Component\\', '', $fqcn);
+        // Strip the base component namespace off
+        $className = str_replace($this->nameSpace, '', $fqcn);
 
-			// Explode the remaining name into an array
-			$classArray = explode('\\', $className);
-
-			// Set the component as the first object in this array
-			$this->component = $classArray[0];
-		}
-		
-		// Set Controller name
-		$ref = new \ReflectionClass($this);
+        // Explode the remaining name into an array
+        $classArray = explode('\\', $className);
+        
+        
+        // Set the component as the first object in this array
+        if (empty($this->component))
+        {
+            $this->component = $classArray[0];
+        }
+        
+        // Set the controller name as the last in this object
+        if(empty($this->name))
+        {
+            $this->name = array_pop($classArray);
+        }
+        
+        
+        // Set Controller name
+        $ref = new \ReflectionClass($this);
 
         $this->name = str_replace('controller', '', strtolower($ref->getShortName()));;
-	}
+    }
 
-	/**
-	 * Execute the controller.
-	 *
-	 * This is a generic method to execute and render a view and is not suitable for tasks.
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0
-	 * @throws  \RuntimeException
-	 */
-	public function execute()
-	{
-		// Get the input
-		$input = $this->getInput();
+    /**
+     * Execute the controller.
+     *
+     * This is a generic method to execute and render a view and is not suitable for tasks.
+     *
+     * @return  void
+     *
+     * @since   1.0
+     * @throws  \RuntimeException
+     */
+    public function execute()
+    {
+        // Get the input
+        $input = $this->getInput();
 
-		// Get some data from the request
-		$vName   = $input->getWord('view', $this->getDefaultView());
-		$vFormat = $input->getWord('format', 'html');
-		$lName   = $input->getCmd('layout', 'index');
+        // Get some data from the request
+        $vName   = $input->getWord('view', $this->getDefaultView());
+        $vFormat = $input->getWord('format', 'html');
+        $lName   = $input->getCmd('layout', 'index');
 
-		$input->set('view', $vName);
+        $input->set('view', $vName);
 
-		$base   = 'Component\\' . ucfirst($this->component);
+        $base   = $this->nameSpace . ucfirst($this->component);
 
-		$vClass = $base . '\\View\\' . ucfirst($vName) . '\\' . ucfirst($vName) . ucfirst($vFormat) . 'View';
-		//$mClass = $base . '\\Model\\' . ucfirst($vName) . 'Model';
-		//
-		//// If a model doesn't exist for our view, revert to the default model
-		//if (!class_exists($mClass))
-		//{
-		//	$mClass = $base . '\\Model\\DefaultModel';
-		//
-		//	// If there still isn't a class, panic.
-		//	if (!class_exists($mClass))
-		//	{
-		//		throw new \RuntimeException(sprintf('No model found for view %s or a default model for %s', $vName, $this->component));
-		//	}
-		//}
+        $vClass = $base . '\\View\\' . ucfirst($vName) . '\\' . ucfirst($vName) . ucfirst($vFormat) . 'View';
+        //$mClass = $base . '\\Model\\' . ucfirst($vName) . 'Model';
+        //
+        //// If a model doesn't exist for our view, revert to the default model
+        //if (!class_exists($mClass))
+        //{
+        //    $mClass = $base . '\\Model\\DefaultModel';
+        //
+        //    // If there still isn't a class, panic.
+        //    if (!class_exists($mClass))
+        //    {
+        //        throw new \RuntimeException(sprintf('No model found for view %s or a default model for %s', $vName, $this->component));
+        //    }
+        //}
 
-		// Make sure the view class exists, otherwise revert to the default
-		if (!class_exists($vClass))
-		{
-			//$vClass = '\\JTracker\\View\\TrackerDefaultView';
+        // Make sure the view class exists, otherwise revert to the default
+        if (!class_exists($vClass))
+        {
+            //$vClass = '\\JTracker\\View\\TrackerDefaultView';
 
-			// If there still isn't a class, panic.
-			//if (!class_exists($vClass))
-			//{
-				throw new \RuntimeException(sprintf('Class %s not found', $vClass));
-			//}
-		}
+            // If there still isn't a class, panic.
+            //if (!class_exists($vClass))
+            //{
+                throw new \RuntimeException(sprintf('Class %s not found', $vClass));
+            //}
+        }
 
-		// Register the templates paths for the view
-		$paths = array();
+        
+        $view = $this->getView($vName, $vFormat);
+        $view->setLayout($vName . '.' . $lName);
+        
+        //try
+        //{
+            // Render our view.
+            echo $view->render();
+        //}
+        //catch (\Exception $e)
+        //{
+        //    echo $this->getApplication()->getDebugger()->renderException($e);
+        //}
 
-		$sub = ('php' == $this->getApplication()->get('renderer.type')) ? '/php' : '';
+        return;
+        
+    }
+    
+    /**
+     * function render
+     */
+    public function render($view, $type, $component)
+    {
+        
+    }
+    
+    /**
+     * Method to check whether an ID is in the edit list.
+     *
+     * @param   string   $context  The context for the session storage.
+     * @param   integer  $id       The ID of the record to add to the edit list.
+     *
+     * @return  boolean  True if the ID is in the edit list.
+     *
+     * @since   1.0
+     */
+    protected function checkEditId($context, $id)
+    {
+        if ($id)
+        {
+            $app    = $this->getApplication();
+            $values = (array) $app->getUserState($context . '.id');
 
-		$path = '';//JPATH_TEMPLATES . $sub . '/' . strtolower($this->component);
+            $result = in_array((int) $id, $values);
 
-		if (is_dir($path))
-		{
-			$paths[] = $path;
-		}
+            if (defined('JDEBUG') && JDEBUG)
+            {
+                Log::add(
+                    sprintf(
+                        'Checking edit ID %s.%s: %d %s',
+                        $context,
+                        $id,
+                        (int) $result,
+                        str_replace("\n", ' ', print_r($values, 1))
+                    ),
+                    Log::INFO,
+                    'controller'
+                );
+            }
 
-		
-		$view = new $vClass();
-		$view->setLayout($vName . '.' . $lName);
+            return $result;
+        }
+        else
+        {
+            // No id for a new item.
+            return true;
+        }
+    }
+    
+    /**
+     * Method to add a record ID to the edit list.
+     *
+     * @param   string   $context  The context for the session storage.
+     * @param   integer  $id       The ID of the record to add to the edit list.
+     *
+     * @return  void
+     *
+     * @since   1.0
+     */
+    protected function holdEditId($context, $id)
+    {
+        $app = $this->getApplication();
+        $values = (array) $app->getUserState($context . '.id');
 
-		//try
-		//{
-			// Render our view.
-			echo $view->render();
-		//}
-		//catch (\Exception $e)
-		//{
-		//	echo $this->getApplication()->getDebugger()->renderException($e);
-		//}
+        // Add the id to the list if non-zero.
+        if (!empty($id))
+        {
+            array_push($values, (int) $id);
+            $values = array_unique($values);
+            $app->setUserState($context . '.id', $values);
 
-		return;
-		
-	}
-	
-	/**
-	 * function render
-	 */
-	public function render($view, $type, $component)
-	{
-		
-	}
-	
-	/**
-	 * function getDefaultView
-	 */
-	public function getDefaultView()
-	{
-		if($this->defaultView)
-		{
-			return $this->defaultView ;
-		}
-		
-		return $this->defaultView = $this->getName();
-	}
-	
-	/**
-	 * function getName
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
+            if (defined('JDEBUG') && JDEBUG)
+            {
+                Log::add(
+                    sprintf(
+                        'Holding edit ID %s.%s %s',
+                        $context,
+                        $id,
+                        str_replace("\n", ' ', print_r($values, 1))
+                    ),
+                    Log::INFO,
+                    'controller'
+                );
+            }
+        }
+    }
+    
+    /**
+     * function getDefaultView
+     */
+    public function getDefaultView()
+    {
+        if($this->defaultView)
+        {
+            return $this->defaultView ;
+        }
+        
+        return $this->defaultView = $this->getName();
+    }
+    
+    /**
+     * Method to get the controller name
+     *
+     * @return  string  The name of the dispatcher
+     *
+     * @since   1.0
+     */
+    public function getName()
+    {
+        if (empty($this->name))
+        {
+            throw new \RuntimeException('Could not get controller name.');
+        }
+ 
+        return $this->name;
+    }
+    
+    /**
+     * Adds to the search path for templates and resources.
+     *
+     * @param   string  $type  The path type (e.g. 'model', 'view').
+     * @param   mixed   $path  The directory string  or stream array to search.
+     *
+     * @return  Controller  A Controller object to support chaining.
+     *
+     * @since   1.0
+     */
+    protected function addPath($type, $path)
+    {
+        if (!isset($this->paths[$type]))
+        {
+            $this->paths[$type] = array();
+        }
+ 
+        // Loop through the path directories
+        foreach ((array) $path as $dir)
+        {
+            // No surrounding spaces allowed!
+            $dir = rtrim(Path::check($dir, '/'), '/') . '/';
+ 
+            // Add to the top of the search dirs
+            array_unshift($this->paths[$type], $dir);
+        }
+ 
+        return $this;
+    }
+    
+    /**
+     * Add one or more view paths to the controller's stack, in LIFO order.
+     *
+     * @param   mixed  $path  The directory (string) or list of directories (array) to add.
+     *
+     * @return  Controller  This object to support chaining.
+     */
+    public function addViewPath($path)
+    {
+        $this->addPath('view', $path);
+ 
+        return $this;
+    }
+    
+    /**
+     * Method to get a reference to the current view and load it if necessary.
+     *
+     * @param   string  $name    The view name. Optional, defaults to the controller name.
+     * @param   string  $type    The view type. Optional.
+     * @param   string  $prefix  The class prefix. Optional.
+     * @param   array   $config  Configuration array for view. Optional. This param
+     *                           copy from CMS but not used now.
+     *
+     * @return  object  Reference to the view or an error.
+     *
+     * @since   1.0
+     */
+    public function getView($name = '', $type = '', $prefix = '', $config = array())
+    {
+        static $views;
+ 
+        if (!isset($views))
+        {
+            $views = array();
+        }
+ 
+        if (empty($name))
+        {
+            $name = $this->getName();
+        }
+ 
+        if (empty($nameSpace))
+        {
+            $nameSpace = $this->getNamespace();
+        }
+        
+        if (empty($type))
+        {
+            $type = 'Html';
+        }
+ 
+        if (empty($views[$name]))
+        {
+            if ($view = $this->createView($name, $nameSpace, $type, $config))
+            {
+                $views[$name] = & $view;
+            }
+            else
+            {
+                throw new \RuntimeException('View: ' . $view . $type . ' not found.');
+ 
+                return $result;
+            }
+        }
+ 
+        return $views[$name];
+    }
+    
+    /**
+     * Method to load and return a view object. This method first looks in the
+     * current template directory for a match and, failing that, uses a default
+     * set path to load the view class file.
+     *
+     * @param   string  $name       The name of the view.
+     * @param   string  $nameSpace  Optional prefix for the view class name.
+     * @param   string  $type       The type of view.
+     * @param   array   $config     Configuration array for the view. Optional.
+     *
+     * @return  mixed  View object on success; null or error result on failure.
+     *
+     * @since   1.0
+     */
+    protected function createView($name, $nameSpace = '', $type = '', $config = array())
+    {
+        // Clean the view name
+        $viewName        = preg_replace('/[^A-Z0-9_]/i', '', $name);
+        $viewNameSpace   = preg_replace('/[^A-Z0-9_]/i', '', $nameSpace);
+        $viewType        = preg_replace('/[^A-Z0-9_]/i', '', $type);
+ 
+        // Build the view class name
+        $viewClass = ucfirst($nameSpace) . ucfirst($this->component) . '\\View\\' .
+                     ucfirst($viewNameSpace) . '\\' . ucfirst($viewName) . ucfirst($viewType) . 'View'
+                     ;
+ 
+        if (!class_exists($viewClass))
+        {
+            throw new \RuntimeException('View Class ' . $viewClass . ' Not found.');
+        }
+ 
+        return new $viewClass();
+    }
 }
