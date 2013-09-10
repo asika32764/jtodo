@@ -73,7 +73,7 @@ abstract class HtmlView extends AbstractView
 		$this->templatePath = JPATH_SOURCE . '/' . str_replace('\\', '/', $this->namespace) . 'Template/' ;
 		$this->setLayout('default');
 		
-		$templatesPaths = array($this->templatePath . $viewName);
+		$templatesPaths = array(JPATH_TEMPLATES, $this->templatePath, );
 		
 		
 		// Get Renderer
@@ -94,35 +94,9 @@ abstract class HtmlView extends AbstractView
 		}
 
 		$config = array();
+		$config['templates_base_dir'] = $this->templatePath . $viewName;
+		$config['environment']['debug'] = JDEBUG ? true : false;
 
-		switch ($renderer)
-		{
-			case 'twig':
-				$config['templates_base_dir'] = $this->getTemplatePath();
-				$config['environment']['debug'] = JDEBUG ? true : false;
-
-				break;
-
-			case 'mustache':
-				$config['templates_base_dir'] = $this->getTemplatePath();
-
-				// . '/partials';
-				$config['partials_base_dir'] = $this->getTemplatePath();
-
-				$config['environment']['debug'] = JDEBUG ? true : false;
-
-				break;
-
-			case 'php':
-				$config['templates_base_dir'] = $this->getTemplatePath();
-				$config['debug'] = JDEBUG ? true : false;
-
-				break;
-
-			default:
-				throw new \RuntimeException('Unsupported renderer: ' . $renderer);
-				break;
-		}
 
 		// Load the renderer.
 		$this->renderer = new $className($config);

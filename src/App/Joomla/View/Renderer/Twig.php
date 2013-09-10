@@ -8,6 +8,8 @@
 
 namespace Joomla\View\Renderer;
 
+use App\Joomla\View\Renderer\Twig\FilesystemLoader;
+
 /**
  * Twig class for rendering output.
  *
@@ -88,7 +90,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 
 		try
 		{
-			$this->twigLoader = new \Twig_Loader_Filesystem($this->templatesPaths);
+			$this->twigLoader = new FilesystemLoader($this->templatesPaths);
 		}
 		catch (\Twig_Error_Loader $e)
 		{
