@@ -9,6 +9,9 @@
 namespace Component\Todo\Model;
 
 use App\Joomla\Model\Model;
+
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 //use App\Joomla\View\HtmlView;
  
 class CategoriesModel extends Model
@@ -18,6 +21,20 @@ class CategoriesModel extends Model
      */
     public function getCategories()
     {
+        $paths = array(__DIR__.'/Entity');
+        $isDevMode = false;
+        
+        // the connection configuration
+        $dbParams = array(
+            'driver'   => 'pdo_mysql',
+            'user'     => 'root',
+            'password' => '1234',
+            'dbname'   => 'jtodo',
+        );
+        
+        $config = Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
+        $entityManager = EntityManager::create($dbParams, $config);
+        
         return array(
             array(
                 'id' => 1,

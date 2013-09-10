@@ -9,5 +9,14 @@
     
     "renderer" : {
         "type" : "twig"
+    },
+    
+    "db" : {
+        "driver"    : "pdo_mysql",
+        "user"      : "root",
+        "password"  : 1234,
+        "name"      : "jtodo",
+        "host"      : "localhost",
+        "prefix"    : "td_"
     }
 }
