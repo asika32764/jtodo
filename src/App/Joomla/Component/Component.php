@@ -83,7 +83,7 @@ abstract class Component implements ComponentInterface, ServiceProviderInterface
 	 */
 	public function register(Container $container)
     {
-        $container->set('component.' . $this->getName(), $this);
+        $container->share('component.' . $this->getName(), $this);
         
         return $container;
     }
@@ -148,7 +148,7 @@ abstract class Component implements ComponentInterface, ServiceProviderInterface
      */
     public function getPath()
     {
-        return JPATH_SOURCE . '/Components/' . ucfirst($this->getName());
+        return JPATH_SOURCE . '/Component/' . ucfirst($this->getName());
     }
     
     /**

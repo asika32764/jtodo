@@ -20,6 +20,7 @@ use Joomla\Model\ModelInterface;
  */
 class View  extends HtmlView
 {
+    
 	/**
 	 * Method to instantiate the view.
 	 *
@@ -31,7 +32,7 @@ class View  extends HtmlView
 	public function __construct()
 	{
 		//$model = $model ? : new TrackerDefaultModel;
-
+        
 		parent::__construct();
 	}
 }

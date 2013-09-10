@@ -40,6 +40,10 @@ abstract class HtmlView extends AbstractView
 	 */
 	protected $renderer = null;
 
+	public $templatePath;
+	
+	protected $namespace = null;
+	
 	/**
 	 * Method to instantiate the view.
 	 *
@@ -56,6 +60,23 @@ abstract class HtmlView extends AbstractView
 		/* @type TrackerApplication $app */
 		$app = Factory::$application;
 
+		// Set Template path
+		$ref = new \ReflectionClass($this);
+		
+		$name = $ref->getName();
+		
+		$name = explode('View', $name);
+		$this->namespace = $name[0];
+		$viewName = explode('\\', $name[1]);
+		$viewName = $viewName[1];
+		
+		$this->templatePath = JPATH_SOURCE . '/' . str_replace('\\', '/', $this->namespace) . 'Template/' ;
+		$this->setLayout('default');
+		
+		$templatesPaths = array($this->templatePath . $viewName);
+		
+		
+		// Get Renderer
 		$renderer = $app->get('renderer.type');
 
 		$className = 'App\\Joomla\\View\\Renderer\\' . ucfirst($renderer);
@@ -77,23 +98,23 @@ abstract class HtmlView extends AbstractView
 		switch ($renderer)
 		{
 			case 'twig':
-				$config['templates_base_dir'] = JPATH_TEMPLATES;
+				$config['templates_base_dir'] = $this->getTemplatePath();
 				$config['environment']['debug'] = JDEBUG ? true : false;
 
 				break;
 
 			case 'mustache':
-				$config['templates_base_dir'] = JPATH_TEMPLATES;
+				$config['templates_base_dir'] = $this->getTemplatePath();
 
 				// . '/partials';
-				$config['partials_base_dir'] = JPATH_TEMPLATES;
+				$config['partials_base_dir'] = $this->getTemplatePath();
 
 				$config['environment']['debug'] = JDEBUG ? true : false;
 
 				break;
 
 			case 'php':
-				$config['templates_base_dir'] = JPATH_TEMPLATES . '/php';
+				$config['templates_base_dir'] = $this->getTemplatePath();
 				$config['debug'] = JDEBUG ? true : false;
 
 				break;
@@ -204,5 +225,25 @@ abstract class HtmlView extends AbstractView
 		$this->layout = $layout;
 
 		return $this;
+	}
+	
+	/**
+	 * Method to get template base path.
+	 * 
+	 * @param   string
+	 *
+	 * @return  string
+	 */
+	public function getTemplatePath()
+	{
+		return $this->templatePath;
+	}
+	
+	/**
+	 * function setTemplatePath
+	 */
+	public function setTemplatePath($path)
+	{
+		$this->templatePath = $path;
 	}
 }

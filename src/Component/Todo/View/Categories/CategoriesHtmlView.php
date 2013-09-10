@@ -9,9 +9,9 @@
 namespace Component\Todo\View\Categories;
 
 use App\Joomla\View\View;
-//use App\Joomla\View\HtmlView;
+use App\Joomla\View\HtmlView;
  
-class CategoriesHtmlView
+class CategoriesHtmlView extends HtmlView
 {
     
 }

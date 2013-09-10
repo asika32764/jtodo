@@ -144,7 +144,7 @@ abstract class Controller extends AbstractController
         // Get some data from the request
         $vName   = $input->getWord('view', $this->getDefaultView());
         $vFormat = $input->getWord('format', 'html');
-        $lName   = $input->getCmd('layout', 'index');
+        $lName   = $input->getCmd('layout', $this->getDefaultView().'/index');
 
         $input->set('view', $vName);
 
