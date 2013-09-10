@@ -13,5 +13,24 @@ use App\Joomla\Model\Model;
  
 class CategoriesModel extends Model
 {
-    
+    /**
+     * function getCtegories
+     */
+    public function getCategories()
+    {
+        return array(
+            array(
+                'id' => 1,
+                'title' => 'Asika'
+            ),
+            array(
+                'id' => 2,
+                'title' => 'Bryan'
+            ),
+            array(
+                'id' => 3,
+                'title' => 'Jordan'
+            )
+        );
+    }
 }

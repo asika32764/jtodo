@@ -13,5 +13,15 @@ use App\Joomla\View\HtmlView;
  
 class CategoriesHtmlView extends HtmlView
 {
-    
+    /**
+     * function render
+     */
+    public function render()
+    {
+        $categories = $this->model->getCategories();
+        
+        $this->renderer->set('categories', $categories);
+        
+        return parent::render();
+    }
 }

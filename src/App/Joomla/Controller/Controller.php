@@ -167,7 +167,7 @@ abstract class Controller extends AbstractController
         $view = $this->getView($vName, $vFormat);
         //$view->setLayout($vName . '.' . $lName);
         
-        $model = $this->getModel($vName);
+        //$model = $this->getModel($vName);
         
         //try
         //{
@@ -385,8 +385,8 @@ abstract class Controller extends AbstractController
         {
             throw new \RuntimeException('View Class ' . $viewClass . ' Not found.');
         }
- 
-        return new $viewClass();
+        
+        return new $viewClass($this->getModel($viewName));
     }
     
     /**
@@ -412,7 +412,7 @@ abstract class Controller extends AbstractController
             $nameSpace = $this->getNamespace();
         }
  
-        if ($model = $this->createModel($name, $nameSpace, $config))
+        if (!$model = $this->createModel($name, $nameSpace, $config))
         {
             return false;
         }

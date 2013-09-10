@@ -1,6 +1,24 @@
 {% extends "todo.twig" %}
 
-{% block body %}
-    {{ parent() }}
-    Categories View
+{% block form_body %}
+<table class="table table-bordered table-striped table-hover">
+    <tr>
+        <th>
+            ID
+        </th>
+        <th>
+            Title
+        </th>
+    </tr>
+    {% for cat in categories %}
+    <tr>
+        <td>
+            {{ cat.id }}
+        </td>
+        <td>
+            {{ cat.title }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 {% endblock %}

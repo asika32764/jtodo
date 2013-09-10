@@ -13,7 +13,7 @@ use Joomla\Language\Text;
 use Joomla\Model\ModelInterface;
 use Joomla\View\Renderer\RendererInterface;
 
-use App\Joomla\View\AbstractView;
+use Joomla\View\AbstractView;
 use App\Joomla\Application\TrackerApplication;
 use App\Joomla\View\Renderer\AppExtension;
 
@@ -53,9 +53,9 @@ abstract class HtmlView extends AbstractView
 	 * @throws  \RuntimeException
 	 * @since   1.0
 	 */
-	public function __construct()
+	public function __construct(ModelInterface $model = null)
 	{
-		parent::__construct();
+		parent::__construct($model);
 
 		/* @type TrackerApplication $app */
 		$app = Factory::$application;
