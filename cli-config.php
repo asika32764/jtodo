@@ -4,10 +4,10 @@ use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 
-require_once dirname(__DIR__)."/vendor/autoload.php";
+require_once __DIR__."/vendor/autoload.php";
 
 // replace with file to your own project bootstrap
-$paths = array( realpath(__DIR__.'/../src/Component/Todo/Model/Entity') );
+$paths = array( __DIR__.'/src/Component/Todo/Model/Entity' );
 $isDevMode = true;
 
 // the connection configuration
