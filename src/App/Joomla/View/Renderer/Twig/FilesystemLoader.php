@@ -43,6 +43,7 @@ class FilesystemLoader extends \Twig_Loader_Filesystem
      */
     protected function findTemplate($template)
     {
+
         $file = parent::findTemplate($template);
         
         return $file;

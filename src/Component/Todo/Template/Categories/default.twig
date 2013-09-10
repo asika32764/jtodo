@@ -1,3 +1,6 @@
-{% extends "index.twig" %}
+{% extends "todo.twig" %}
 
-{% block body %}Categories View{% endblock %}
+{% block body %}
+    {{ parent() }}
+    Categories View
+{% endblock %}
