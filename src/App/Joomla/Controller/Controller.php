@@ -14,6 +14,8 @@ use Joomla\Controller\AbstractController;
 use Joomla\Input\Input;
 use Joomla\Log\Log;
 use Joomla\Filesystem\Path;
+use Joomla\DI\Container;
+use Joomla\DI\ContainerAwareInterface;
 
 //use App\Joomla\Controller\ControllerInterface;
 //use JTracker\Application\TrackerApplication;
@@ -24,7 +26,7 @@ use Joomla\Filesystem\Path;
  *
  * @since  1.0
  */
-abstract class Controller extends AbstractController// implements ControllerInterface
+abstract class Controller extends AbstractController implements ContainerAwareInterface//ControllerInterface
 {
     /** 
      * The default view for the app
@@ -121,37 +123,10 @@ abstract class Controller extends AbstractController// implements ControllerInte
         $lName   = $input->getCmd('layout', $this->getDefaultView().'/index');
 
         $input->set('view', $vName);
-
-        $base   = $this->nameSpace . ucfirst($this->component);
-        //$mClass = $base . '\\Model\\' . ucfirst($vName) . 'Model';
-        //
-        //// If a model doesn't exist for our view, revert to the default model
-        //if (!class_exists($mClass))
-        //{
-        //    $mClass = $base . '\\Model\\DefaultModel';
-        //
-        //    // If there still isn't a class, panic.
-        //    if (!class_exists($mClass))
-        //    {
-        //        throw new \RuntimeException(sprintf('No model found for view %s or a default model for %s', $vName, $this->component));
-        //    }
-        //}
-
         
         $view = $this->getView($vName, $vFormat);
-        //$view->setLayout($vName . '.' . $lName);
-        
-        //$model = $this->getModel($vName);
-        
-        //try
-        //{
-            // Render our view.
-            echo $view->render();
-        //}
-        //catch (\Exception $e)
-        //{
-        //    echo $this->getApplication()->getDebugger()->renderException($e);
-        //}
+
+        echo $view->render();
 
         return;
         
@@ -163,6 +138,22 @@ abstract class Controller extends AbstractController// implements ControllerInte
     public function render($view, $type, $component)
     {
         
+    }
+    
+    /**
+     * function setContainer
+     */
+    public function setContainer(Container $container)
+    {
+        $this->container = $container;
+    }
+    
+    /**
+     * function getContainer
+     */
+    public function getContainer()
+    {
+        return $this->container;
     }
     
     /**

@@ -272,6 +272,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
             $route = $route ?: '*';
             
             $controller = $router->getController($route);
+            $controller->setContainer($this->container);
             
             echo $controller->execute();
             
