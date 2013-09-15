@@ -1,7 +1,7 @@
 {
     "_default_three_segments" : 
     {
-        "pattern" : ":controller/:id/:action",
+        "pattern" : ":controller/:id/:task",
         "controller" : "\\{:component}\\Controller\\{:controller}Controller"
     },
         

@@ -7,5 +7,10 @@
     "todo_ggg" : {
         "pattern" : "ggg" ,
         "controller" : "\\Todo\\Controller\\GggController"
+    },
+    
+    "todo_category_add" : {
+        "pattern" : "category/add" ,
+        "controller" : "\\Todo\\Controller\\Category\\AddController"
     }
 }

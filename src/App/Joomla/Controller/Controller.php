@@ -247,26 +247,6 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
     }
     
     /**
-     * Method to get the controller name
-     *
-     * @return  string  The name of the dispatcher
-     *
-     * @since   1.0
-     */
-    public function getName()
-    {
-        if(!empty($this->name))
-        {
-            return $this->name;
-        }
-        
-        $name = $this->getReflection()->getShortName();
-        $name = substr($name, 0, -10);
-        
-        return $this->name = $name;
-    }
-    
-    /**
      * Method to get a reference to the current view and load it if necessary.
      *
      * @param   string  $name    The view name. Optional, defaults to the controller name.
@@ -286,7 +266,8 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         $nameSpace  = $nameSpace    ?: $this->getNamespace();
         $type       = $type         ?: 'Html';
         
-        $nameSpace  = substr($nameSpace, 0, -11);
+        $nameSpace  = explode('Controller', $nameSpace);
+        $nameSpace  = trim( array_shift($nameSpace), '\\');
         
         // Clean the view name
         $viewName        = preg_replace('/[^A-Z0-9_]/i', '', $name);
@@ -345,6 +326,26 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         $model = $view->getModel();
         
         return $model;
+    }
+    
+    /**
+     * Method to get the controller name
+     *
+     * @return  string  The name of the dispatcher
+     *
+     * @since   1.0
+     */
+    public function getName()
+    {
+        if(!empty($this->name))
+        {
+            return $this->name;
+        }
+        
+        $name = $this->getReflection()->getShortName();
+        $name = substr($name, 0, -10);
+        
+        return $this->name = $name;
     }
     
     /**
