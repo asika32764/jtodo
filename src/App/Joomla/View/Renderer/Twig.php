@@ -6,9 +6,10 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Joomla\View\Renderer;
+namespace App\Joomla\View\Renderer;
 
 use App\Joomla\View\Renderer\Twig\FilesystemLoader;
+use App\Joomla\View\Renderer\RendererInterface;
 
 /**
  * Twig class for rendering output.
