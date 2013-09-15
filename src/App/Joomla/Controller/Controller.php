@@ -124,12 +124,11 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
 
         $input->set('view', $vName);
         
-        $view = $this->getView($vName, $vFormat);
-
-        echo $view->render();
-
-        return;
+        $view = $this->getView();
         
+        $model = $this->getModel();
+
+        return $view->render();
     }
     
     /**
@@ -285,62 +284,13 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
      */
     public function getView($name = '', $type = '', $nameSpace = '', $config = array())
     {
-        static $views;
- 
-        if (!isset($views))
-        {
-            $views = array();
-        }
- 
-        if (empty($name))
-        {
-            $name = $this->getName();
-        }
- 
-        if (empty($nameSpace))
-        {
-            $nameSpace = $this->getNamespace();
-            $nameSpace = substr($nameSpace, 0, -11);
-        }
+        // Set default options
+        $name       = $name         ?: $this->getName();
+        $nameSpace  = $nameSpace    ?: $this->getNamespace();
+        $type       = $type         ?: 'Html';
         
-        if (empty($type))
-        {
-            $type = 'Html';
-        }
- 
-        if (empty($views[$name]))
-        {
-            if ($view = $this->createView($name, $nameSpace, $type, $config))
-            {
-                $views[$name] = & $view;
-            }
-            else
-            {
-                throw new \RuntimeException('View: ' . $view . $type . ' not found.');
- 
-                return $result;
-            }
-        }
- 
-        return $views[$name];
-    }
-    
-    /**
-     * Method to load and return a view object. This method first looks in the
-     * current template directory for a match and, failing that, uses a default
-     * set path to load the view class file.
-     *
-     * @param   string  $name       The name of the view.
-     * @param   string  $nameSpace  Optional prefix for the view class name.
-     * @param   string  $type       The type of view.
-     * @param   array   $config     Configuration array for the view. Optional.
-     *
-     * @return  mixed  View object on success; null or error result on failure.
-     *
-     * @since   1.0
-     */
-    protected function createView($name, $nameSpace = '', $type = '', $config = array())
-    {
+        $nameSpace  = substr($nameSpace, 0, -11);
+        
         // Clean the view name
         $viewName        = preg_replace('/[^A-Z0-9_]/i', '', $name);
         $viewType        = preg_replace('/[^A-Z0-9_]/i', '', $type);
@@ -349,13 +299,35 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         $viewClass = ucfirst($nameSpace) . '\\View\\' .
                      ucfirst($viewName) . '\\' . ucfirst($viewName) . ucfirst($viewType) . 'View'
                      ;
- 
+        
         if (!class_exists($viewClass))
         {
             throw new \RuntimeException('View Class ' . $viewClass . ' Not found.');
+        
+            return false;
         }
         
-        return new $viewClass($this->getModel($viewName));
+        // Get View from container
+        $container = $this->getContainer();
+        
+        try
+        {
+            $view = $container->get($viewClass);
+        }
+        catch(\InvalidArgumentException $e)
+        {
+            // If View not exists, create one.
+            $view = $container->buildObject($viewClass, true);
+        }
+        
+        if (!$view)
+        {
+            throw new \RuntimeException('View Class ' . $viewClass . ' Not found.');
+
+            return false;
+        }
+ 
+        return $view;
     }
     
     /**
@@ -371,49 +343,11 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
      */
     public function getModel($name = '', $nameSpace = '', $config = array())
     {
-        if (empty($name))
-        {
-            $name = $this->getName();
-        }
- 
-        if (empty($nameSpace))
-        {
-            $nameSpace = $this->getNamespace();
-            $nameSpace = substr($nameSpace, 0, -11);
-        }
- 
-        if (!$model = $this->createModel($name, $nameSpace, $config))
-        {
-            return false;
-        }
+        $view  = $this->getView($name, $nameSpace);
+        
+        $model = $view->getModel();
+        
         return $model;
-    }
-    
-    /**
-     * Method to load and return a model object.
-     *
-     * @param   string  $name    The name of the model.
-     * @param   string  $prefix  Optional model prefix.
-     * @param   array   $config  Configuration array for the model. Optional.
-     *
-     * @return  mixed   Model object on success; otherwise null failure.
-     *
-     * @since   1.0
-     */
-    protected function createModel($name, $nameSpace = '', $config = array())
-    {
-        // Clean the model name
-        $modelName   = preg_replace('/[^A-Z0-9_]/i', '', $name);
- 
-        // Build the model class name
-        $modelClass = ucfirst($nameSpace) . '\\Model\\' . ucfirst($modelName) . 'Model';
- 
-        if (!class_exists($modelClass))
-        {
-            throw new \RuntimeException('Model Class ' . $modelClass . ' Not found.');
-        }
- 
-        return new $modelClass();
     }
     
     /**

@@ -84,7 +84,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 		// Set the templates location path.
 		$this->setTemplatesPaths($this->config['templates_base_dir'], true);
 
-		if ($this->config['environment']['debug'])
+		if (!empty($this->config['environment']['debug']))
 		{
 			$this->addExtension(new \Twig_Extension_Debug);
 		}
@@ -95,7 +95,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 		}
 		catch (\Twig_Error_Loader $e)
 		{
-			throw new \RuntimeException($e->getRawMessage());
+			//throw new \RuntimeException($e->getRawMessage());
 		}
 
 		parent::__construct($this->twigLoader, $this->config['environment']);

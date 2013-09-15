@@ -30,6 +30,14 @@ class View extends AbstractView implements ViewInterface
     protected $renderer;
     
     /**
+     * function getModel
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+    
+    /**
      * function setRenderer
      */
     public function setRenderer(RendererInterface $renderer)
