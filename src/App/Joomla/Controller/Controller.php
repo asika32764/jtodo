@@ -119,14 +119,14 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
 
         // Get some data from the request
         $vName   = $input->getWord('view', $this->getDefaultView());
-        $vFormat = $input->getWord('format', 'html');
-        $lName   = $input->getCmd('layout', $this->getDefaultView().'/index');
+        $vFormat = $input->getWord('format', 'Html');
+        $lName   = $input->getCmd('layout', 'default');
 
         $input->set('view', $vName);
         
-        $view = $this->getView();
+        $view = $this->getView($vName, $vFormat);
         
-        $view->setLayout('default');
+        $view->setLayout($lName);
         
         $model = $this->getModel();
 
@@ -146,7 +146,7 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
      */
     public function setContainer(Container $container)
     {
-        $this->container = $container;
+        $this->container = $container->createChild();
     }
     
     /**

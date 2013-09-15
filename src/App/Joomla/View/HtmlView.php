@@ -61,12 +61,11 @@ abstract class HtmlView extends View implements ViewInterface
 		/* @type TrackerApplication $app */
 		$app = Factory::$application;
 		
-		// Set Template path
-		$viewName = $this->getName();
-		
-		$templatePath = $this->getPath() . '/../../Template/' ;
+		// Set Template paths
+		$templatePath = $this->getPath() . '/../../Template' ;
 		$templatePath = realpath($templatePath);
-		$basePath = $templatePath . '/' . $viewName;
+		
+		$basePath = $templatePath . '/' . $this->getName();
 
 		// Register additional paths.
 		$renderer->setTemplatesPaths(array($basePath, $templatePath, JPATH_TEMPLATES), true);
