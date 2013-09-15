@@ -242,13 +242,8 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
      * function getDefaultView
      */
     public function getDefaultView()
-    {
-        if($this->defaultView)
-        {
-            return $this->defaultView ;
-        }
-        
-        return $this->defaultView = $this->getName();
+    {   
+        return $this->defaultView ?: $this->getName();
     }
     
     /**
@@ -287,7 +282,7 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
     public function getView($name = '', $type = '', $nameSpace = '', $config = array())
     {
         // Set default options
-        $name       = $name         ?: $this->getName();
+        $name       = $name         ?: $this->getDefaultView();
         $nameSpace  = $nameSpace    ?: $this->getNamespace();
         $type       = $type         ?: 'Html';
         
