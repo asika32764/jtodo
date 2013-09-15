@@ -24,7 +24,7 @@ use Joomla\Filesystem\Path;
  */
 abstract class Controller extends AbstractController
 {
-    /**
+    /** 
      * The default view for the app
      *
      * @var    string
@@ -46,7 +46,7 @@ abstract class Controller extends AbstractController
      * @var    string
      * @since  1.0
      */
-    protected $nameSpace = 'Component\\';
+    protected $nameSpace = null;
     
     /**
      * The name of the controller
@@ -62,7 +62,7 @@ abstract class Controller extends AbstractController
      * @var    string 
      * @since  1.0
      */
-    protected $basePath;
+    protected $path;
     
     /**
      * Redirect message.
@@ -96,34 +96,6 @@ abstract class Controller extends AbstractController
         }
         
         parent::__construct($input, $app);
-        
-        // Get the fully qualified class name for the current object
-        $fqcn = (get_class($this));
-
-        // Strip the base component namespace off
-        $className = str_replace($this->nameSpace, '', $fqcn);
-
-        // Explode the remaining name into an array
-        $classArray = explode('\\', $className);
-        
-        
-        // Set the component as the first object in this array
-        if (empty($this->component))
-        {
-            $this->component = $classArray[0];
-        }
-        
-        // Set the controller name as the last in this object
-        if(empty($this->name))
-        {
-            $this->name = array_pop($classArray);
-        }
-        
-        
-        // Set Controller name
-        $ref = new \ReflectionClass($this);
-
-        $this->name = str_replace('controller', '', strtolower($ref->getShortName()));;
     }
 
     /**
@@ -294,12 +266,15 @@ abstract class Controller extends AbstractController
      */
     public function getName()
     {
-        if (empty($this->name))
+        if(!empty($this->name))
         {
-            throw new \RuntimeException('Could not get controller name.');
+            return $this->name;
         }
- 
-        return $this->name;
+        
+        $name = $this->getReflection()->getShortName();
+        $name = substr($name, 0, -10);
+        
+        return $this->name = $name;
     }
     
     /**
@@ -332,6 +307,7 @@ abstract class Controller extends AbstractController
         if (empty($nameSpace))
         {
             $nameSpace = $this->getNamespace();
+            $nameSpace = substr($nameSpace, 0, -11);
         }
         
         if (empty($type))
@@ -377,7 +353,7 @@ abstract class Controller extends AbstractController
         $viewType        = preg_replace('/[^A-Z0-9_]/i', '', $type);
  
         // Build the view class name
-        $viewClass = ucfirst($nameSpace) . ucfirst($this->component) . '\\View\\' .
+        $viewClass = ucfirst($nameSpace) . '\\View\\' .
                      ucfirst($viewName) . '\\' . ucfirst($viewName) . ucfirst($viewType) . 'View'
                      ;
  
@@ -410,6 +386,7 @@ abstract class Controller extends AbstractController
         if (empty($nameSpace))
         {
             $nameSpace = $this->getNamespace();
+            $nameSpace = substr($nameSpace, 0, -11);
         }
  
         if (!$model = $this->createModel($name, $nameSpace, $config))
@@ -436,7 +413,7 @@ abstract class Controller extends AbstractController
         $modelName   = preg_replace('/[^A-Z0-9_]/i', '', $name);
  
         // Build the model class name
-        $modelClass = ucfirst($nameSpace) . ucfirst($this->component) . '\\Model\\' . ucfirst($modelName) . 'Model';
+        $modelClass = ucfirst($nameSpace) . '\\Model\\' . ucfirst($modelName) . 'Model';
  
         if (!class_exists($modelClass))
         {
@@ -455,11 +432,24 @@ abstract class Controller extends AbstractController
      */
     public function getNamespace()
     {
-        if (empty($this->nameSpace))
+        if (!empty($this->nameSpace))
         {
-            throw new \RuntimeException('Namespace not setted.');
+            return $this->nameSpace;
         }
  
-        return $this->nameSpace;
+        return $this->nameSpace = $this->getReflection()->getNamespaceName();
+    }
+    
+    /**
+     * function getReflection
+     */
+    public function getReflection()
+    {
+        if(empty($this->reflection))
+        {
+            $this->reflection = new \ReflectionClass($this);
+        }
+        
+        return $this->reflection;
     }
 }
