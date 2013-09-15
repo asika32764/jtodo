@@ -126,6 +126,8 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         
         $view = $this->getView();
         
+        $view->setLayout('default');
+        
         $model = $this->getModel();
 
         return $view->render();

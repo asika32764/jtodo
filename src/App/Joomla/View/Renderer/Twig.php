@@ -5,12 +5,12 @@
  * @copyright  Copyright (C) 2013 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
-
+ 
 namespace App\Joomla\View\Renderer;
-
+ 
 use App\Joomla\View\Renderer\Twig\FilesystemLoader;
 use App\Joomla\View\Renderer\RendererInterface;
-
+ 
 /**
  * Twig class for rendering output.
  *
@@ -18,7 +18,7 @@ use App\Joomla\View\Renderer\RendererInterface;
  */
 class Twig extends \Twig_Environment implements RendererInterface
 {
-	/**
+    /**
 	 * The renderer default configuration parameters.
 	 *
 	 * @var    array
@@ -35,7 +35,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 		),
 		'environment'        => array()
 	);
-
+ 
 	/**
 	 * The data for the renderer.
 	 *
@@ -43,7 +43,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 	 * @since  1.0
 	 */
 	private $data = array();
-
+ 
 	/**
 	 * The templates location paths.
 	 *
@@ -51,7 +51,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 	 * @since  1.0
 	 */
 	private $templatesPaths = array();
-
+ 
 	/**
 	 * Current template name.
 	 *
@@ -59,7 +59,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 	 * @since  1.0
 	 */
 	private $template;
-
+ 
 	/**
 	 * Loads template from the filesystem.
 	 *
@@ -67,7 +67,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 	 * @since  1.0
 	 */
 	private $twigLoader;
-
+ 
 	/**
 	 * Instantiate the renderer.
 	 *
@@ -76,31 +76,26 @@ class Twig extends \Twig_Environment implements RendererInterface
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function __construct($config = array())
+	public function __construct()
 	{
-		// Merge the config.
-		$this->config = array_merge($this->config, $config);
-
-		// Set the templates location path.
-		$this->setTemplatesPaths($this->config['templates_base_dir'], true);
-
+ 
 		if (!empty($this->config['environment']['debug']))
 		{
-			$this->addExtension(new \Twig_Extension_Debug);
+			//$this->addExtension(new \Twig_Extension_Debug);
 		}
-
+ 
 		try
 		{
-			$this->twigLoader = new FilesystemLoader($this->templatesPaths);
+			$this->twigLoader = new FilesystemLoader();
 		}
 		catch (\Twig_Error_Loader $e)
 		{
-			//throw new \RuntimeException($e->getRawMessage());
+			throw new \RuntimeException($e->getRawMessage());
 		}
-
+ 
 		parent::__construct($this->twigLoader, $this->config['environment']);
 	}
-
+ 
 	/**
 	 * Get the Lexer instance.
 	 *
@@ -114,10 +109,10 @@ class Twig extends \Twig_Environment implements RendererInterface
 		{
 			$this->lexer = new \Twig_Lexer($this, $this->config['delimiters']);
 		}
-
+ 
 		return $this->lexer;
 	}
-
+ 
 	/**
 	 * Set the data for the renderer.
 	 *
@@ -145,7 +140,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 			{
 				throw new \InvalidArgumentException('No value defined.');
 			}
-
+ 
 			if ($global)
 			{
 				$this->addGlobal($key, $value);
@@ -155,10 +150,10 @@ class Twig extends \Twig_Environment implements RendererInterface
 				$this->data[$key] = $value;
 			}
 		}
-
+ 
 		return $this;
 	}
-
+ 
 	/**
 	 * Unset a particular variable.
 	 *
@@ -172,7 +167,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 	{
 		return $this->unsetData($key);
 	}
-
+ 
 	/**
 	 * Render and return compiled HTML.
 	 *
@@ -190,12 +185,12 @@ class Twig extends \Twig_Environment implements RendererInterface
 		{
 			$this->setTemplate($template);
 		}
-
+ 
 		if (!empty($data))
 		{
 			$this->set($data);
 		}
-
+ 
 		try
 		{
 			return $this->load()->render($this->data);
@@ -205,7 +200,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 			throw new \RuntimeException($e->getRawMessage());
 		}
 	}
-
+ 
 	/**
 	 * Display the compiled HTML content.
 	 *
@@ -222,12 +217,12 @@ class Twig extends \Twig_Environment implements RendererInterface
 		{
 			$this->setTemplate($template);
 		}
-
+ 
 		if (!empty($data))
 		{
 			$this->set($data);
 		}
-
+ 
 		try
 		{
 			$this->load()->display($this->data);
@@ -237,7 +232,15 @@ class Twig extends \Twig_Environment implements RendererInterface
 			echo $e->getRawMessage();
 		}
 	}
-
+    
+    /**
+     * function getEngine
+     */
+    public function getEngine()
+    {
+        
+    }
+ 
 	/**
 	 * Get the current template name.
 	 *
@@ -249,7 +252,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 	{
 		return $this->template;
 	}
-
+ 
 	/**
 	 * Add a path to the templates location array.
 	 *
@@ -263,7 +266,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 	{
 		return $this->setTemplatesPaths($path, true);
 	}
-
+ 
 	/**
 	 * Set the template.
 	 *
@@ -276,10 +279,10 @@ class Twig extends \Twig_Environment implements RendererInterface
 	public function setTemplate($name)
 	{
 		$this->template = $name;
-
+ 
 		return $this;
 	}
-
+ 
 	/**
 	 * Sets the paths where templates are stored.
 	 *
@@ -296,7 +299,7 @@ class Twig extends \Twig_Environment implements RendererInterface
 		{
 			$paths = array($paths);
 		}
-
+ 
 		foreach ($paths as $path)
 		{
 			if ($overrideBaseDir)
@@ -321,10 +324,10 @@ class Twig extends \Twig_Environment implements RendererInterface
 				echo $e->getRawMessage();
 			}
 		}
-
+ 
 		return $this;
 	}
-
+ 
 	/**
 	 * Load the template and return an output object.
 	 *

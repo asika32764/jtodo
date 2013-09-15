@@ -11,8 +11,8 @@ namespace App\Joomla\View;
 use Joomla\Factory;
 use Joomla\Language\Text;
 use Joomla\Model\ModelInterface;
-use Joomla\View\Renderer\RendererInterface;
 
+use App\Joomla\View\Renderer\RendererInterface;
 use App\Joomla\Application\TrackerApplication;
 use App\Joomla\View\View;
 use App\Joomla\View\ViewInterface;
@@ -43,7 +43,7 @@ abstract class HtmlView extends View implements ViewInterface
 
 	public $templatePath;
 	
-	protected $namespace = null;
+	
 	
 	/**
 	 * Method to instantiate the view.
@@ -54,71 +54,31 @@ abstract class HtmlView extends View implements ViewInterface
 	 * @throws  \RuntimeException
 	 * @since   1.0
 	 */
-	public function __construct(ModelInterface $model = null)
+	public function __construct(ModelInterface $model = null, RendererInterface $renderer = null)
 	{
-		parent::__construct($model);
+		parent::__construct($model, $renderer);
 
 		/* @type TrackerApplication $app */
 		$app = Factory::$application;
-
+		
 		// Set Template path
-		$ref = new \ReflectionClass($this);
+		$viewName = $this->getName();
 		
-		$name = $ref->getName();
-		
-		$name = explode('View', $name);
-		$this->namespace = $name[0];
-		$viewName = explode('\\', $name[1]);
-		$viewName = $viewName[1];
-		
-		$this->templatePath = JPATH_SOURCE . '/' . str_replace('\\', '/', $this->namespace) . 'Template/' ;
-		$this->setLayout('default');
-		
-		$templatesPaths = array(JPATH_TEMPLATES, $this->templatePath, );
-		
-		
-		// Get Renderer
-		$renderer = $app->get('renderer.type');
-
-		$className = 'App\\Joomla\\View\\Renderer\\' . ucfirst($renderer);
-
-		// Check if the specified renderer exists in the application
-		if (false == class_exists($className))
-		{
-			$className = 'Joomla\\View\\Renderer\\' . ucfirst($renderer);
-
-			// Check if the specified renderer exists in the Framework
-			if (false == class_exists($className))
-			{
-				throw new \RuntimeException(sprintf('Invalid renderer: %s', $renderer));
-			}
-		}
-
-		$config = array();
-		$config['templates_base_dir'] = $this->templatePath . $viewName;
-		$config['environment']['debug'] = JDEBUG ? true : false;
-
-
-		// Load the renderer.
-		$this->renderer = new $className($config);
+		$templatePath = $this->getPath() . '/../../Template/' ;
+		$templatePath = realpath($templatePath);
+		$basePath = $templatePath . '/' . $viewName;
 
 		// Register tracker's extension.
-		$this->renderer->addExtension(new AppExtension);
+		$renderer->addExtension(new AppExtension);
 
 		// Register additional paths.
-		if (!empty($templatesPaths))
-		{
-			$this->renderer->setTemplatesPaths($templatesPaths, true);
-		}
-
-		//$gitHubHelper = new GitHubLoginHelper($app->get('github.client_id'), $app->get('github.client_secret'));
-
-		//$this->renderer
-			//->set('user', $app->getUser());
+		$renderer->setTemplatesPaths(array($basePath, $templatePath, JPATH_TEMPLATES), true);
 
 		// Retrieve and clear the message queue
-		$this->renderer->set('flashBag', $app->getMessageQueue());
+		$renderer->set('flashBag', $app->getMessageQueue());
 		$app->clearMessageQueue();
+		
+		$this->renderer = $renderer;
 	}
 
 	/**

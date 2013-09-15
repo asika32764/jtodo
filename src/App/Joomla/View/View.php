@@ -29,6 +29,14 @@ class View extends AbstractView implements ViewInterface
 {
     protected $renderer;
     
+    protected $reflection;
+    
+    protected $name;
+    
+    protected $path;
+    
+    protected $namespace;
+    
     /**
      * function getModel
      */
@@ -56,6 +64,66 @@ class View extends AbstractView implements ViewInterface
 	{
 		return $this->renderer;
 	}
+    
+    /**
+	 * function getName
+	 */
+	public function getName()
+	{
+		if($this->name)
+        {
+            return $this->name;
+        }
+        
+        $name = $this->getReflection()->getNamespaceName();
+        $name = explode('\\View\\', $name);
+        $name = array_pop($name);
+        
+        return $this->name = trim($name, '\\');
+	}
+	
+	/**
+	 * function getPath
+	 */
+	public function getPath()
+	{
+		if($this->path)
+        {
+            return $this->path;
+        }
+        
+        $path = $this->getReflection()->getFileName();
+        
+        return $this->path = dirname($path);
+	}
+    
+    /**
+     * function getReflection
+     */
+    public function getReflection()
+    {
+        if($this->reflection)
+        {
+           return $this->reflection; 
+        }
+        
+        return $this->reflection = new \ReflectionClass($this);
+    }
+    
+    /**
+     * function getNamespace
+     */
+    public function getNamespace()
+    {
+        if($this->namespace)
+        {
+            return $this->namespace;
+        }
+        
+        $namespace = $this->getReflection()->getNamespaceName();
+        
+        return $this->namespace = $namespace;
+    }
     
     /**
 	 * Method to render the view.
