@@ -1,6 +1,6 @@
 <?php
 /**
- * Part of the Joomla Tracker Controller Package
+ * Part of the Joomla Edition Controller Package
  *
  * @copyright  Copyright (C) 2012 - 2013 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
@@ -14,6 +14,8 @@ use Joomla\Controller\AbstractController;
 use Joomla\Input\Input;
 use Joomla\Log\Log;
 use Joomla\Filesystem\Path;
+
+//use App\Joomla\Controller\ControllerInterface;
 //use JTracker\Application\TrackerApplication;
 //use JTracker\View\AbstractTrackerHtmlView;
 
@@ -22,7 +24,7 @@ use Joomla\Filesystem\Path;
  *
  * @since  1.0
  */
-abstract class Controller extends AbstractController
+abstract class Controller extends AbstractController// implements ControllerInterface
 {
     /** 
      * The default view for the app
