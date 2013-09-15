@@ -10,7 +10,7 @@ namespace App\Joomla\Component;
 
 use Joomla\Router\Router;
 
-interface ComponentInterface
+interface ComponentInterface 
 {
     /**
      * Get component name.
@@ -20,15 +20,6 @@ interface ComponentInterface
      * @since 1.0
      */
     public function getName();
-    
-    /**
-     * Set component name.
-     *
-     * @return  string
-     * 
-     * @since 1.0
-     */
-    public function setName($name);
     
     /**
      * Parse uri segments as route.
@@ -66,4 +57,13 @@ interface ComponentInterface
      * function getDefaultController
      */
     public function getDefaultController();
+
+    /**
+     * Gets the Conponent namespace.
+     *
+     * @return string The Bundle namespace
+     *
+     * @api
+     */
+    public function getNamespace();
 }

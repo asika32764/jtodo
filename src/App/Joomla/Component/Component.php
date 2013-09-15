@@ -9,11 +9,12 @@
 namespace App\Joomla\Component;
 
 use App\Joomla\Application\Application;
+use App\Joomla\DI\ContainerAware;
 use Joomla\Router\Router;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\DI\Container;
 
-abstract class Component implements ComponentInterface, ServiceProviderInterface
+abstract class Component extends ContainerAware implements ComponentInterface, ServiceProviderInterface
 {
     /**
      * Component name.
@@ -44,6 +45,14 @@ abstract class Component implements ComponentInterface, ServiceProviderInterface
      * @since 1.0
      */
     protected $container = null ;
+	
+	/**
+     * Reflection object of self.
+     *
+     * @var \ReflectionClass
+     * @since 1.0
+     */
+	protected $reflection;
     
     /**
 	 * Constructor.
@@ -60,14 +69,14 @@ abstract class Component implements ComponentInterface, ServiceProviderInterface
         $this->application  = $application;
         $this->container    = $container;
         
-		$ref = new \ReflectionClass($this);
+		$ref = $this->reflection = new \ReflectionClass($this);
         
         if(!$name)
         {
             $name = str_replace('component', '', strtolower($ref->getShortName()));
         }
         
-        $this->setName($name);
+        $this->name = $name;
         
 		$this->register($container);
     }
@@ -94,14 +103,6 @@ abstract class Component implements ComponentInterface, ServiceProviderInterface
     public function getName()
     {
         return $this->name ;
-    }
-    
-    /**
-     * function setName
-     */
-    public function setName($name)
-    {
-        $this->name = $name ;
     }
     
     /**
@@ -148,8 +149,26 @@ abstract class Component implements ComponentInterface, ServiceProviderInterface
      */
     public function getPath()
     {
-        return JPATH_SOURCE . '/Component/' . ucfirst($this->getName());
+		if (null === $this->reflection) {
+            $this->reflection = new \ReflectionObject($this);
+        }
+
+        return dirname($this->reflection->getFileName());
+		
+        //return JPATH_SOURCE . '/Component/' . ucfirst($this->getName());
     }
+	
+	/**
+	 * function getNamespace
+	 */
+	public function getNamespace()
+	{
+		if (null === $this->reflection) {
+            $this->reflection = new \ReflectionObject($this);
+        }
+
+        return $this->reflection->getNamespaceName();
+	}
     
     /**
      * Parse uri segments as route.

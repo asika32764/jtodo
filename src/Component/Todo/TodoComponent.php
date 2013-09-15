@@ -11,7 +11,6 @@ use Joomla\Factory;
 use App\Joomla\Application\Application;
 use App\Joomla\Component\Component;
 
-
 /**
  * Class TrackerDebugger.
  *
