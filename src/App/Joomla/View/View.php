@@ -11,6 +11,13 @@ namespace App\Joomla\View;
 use Joomla\View\AbstractView;
 use Joomla\Model\ModelInterface;
 
+use Joomla\Factory;
+use Joomla\Language\Text;
+
+use App\Joomla\View\Renderer\RendererInterface;
+use App\Joomla\View\Renderer\AppExtension;
+use App\Joomla\View\ViewInterface;
+
 //use JTracker\Model\TrackerDefaultModel;
 
 /**
@@ -18,21 +25,52 @@ use Joomla\Model\ModelInterface;
  *
  * @since  1.0
  */
-class View  extends HtmlView
+class View extends AbstractView implements ViewInterface
 {
+    protected $renderer;
     
-	/**
-	 * Method to instantiate the view.
+    /**
+     * function setRenderer
+     */
+    public function setRenderer(RendererInterface $renderer)
+    {
+        $this->renderer = $renderer;
+    }
+    
+    /**
+	 * Method to get the renderer object.
 	 *
-	 * @param   ModelInterface  $model           The model object.
-	 * @param   string|array    $templatesPaths  The templates paths.
+	 * @return  RendererInterface  The renderer object.
 	 *
 	 * @since   1.0
 	 */
-	public function __construct()
+	public function getRenderer()
 	{
-		//$model = $model ? : new TrackerDefaultModel;
-        
-		parent::__construct();
+		return $this->renderer;
+	}
+    
+    /**
+	 * Method to render the view.
+	 *
+	 * @return  string  The rendered view.
+	 *
+	 * @since   1.0
+	 * @throws  \RuntimeException
+	 */
+	public function render()
+	{
+		return $this->renderer->render($this->layout);
+	}
+    
+    /**
+	 * Magic toString method that is a proxy for the render method.
+	 *
+	 * @return  string
+	 *
+	 * @since   1.0
+	 */
+	public function __toString()
+	{
+		return $this->render();
 	}
 }

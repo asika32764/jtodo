@@ -13,8 +13,9 @@ use Joomla\Language\Text;
 use Joomla\Model\ModelInterface;
 use Joomla\View\Renderer\RendererInterface;
 
-use Joomla\View\AbstractView;
 use App\Joomla\Application\TrackerApplication;
+use App\Joomla\View\View;
+use App\Joomla\View\ViewInterface;
 use App\Joomla\View\Renderer\AppExtension;
 
 /**
@@ -22,7 +23,7 @@ use App\Joomla\View\Renderer\AppExtension;
  *
  * @since  1.0
  */
-abstract class HtmlView extends AbstractView
+abstract class HtmlView extends View implements ViewInterface
 {
 	/**
 	 * The view layout.
@@ -121,18 +122,6 @@ abstract class HtmlView extends AbstractView
 	}
 
 	/**
-	 * Magic toString method that is a proxy for the render method.
-	 *
-	 * @return  string
-	 *
-	 * @since   1.0
-	 */
-	public function __toString()
-	{
-		return $this->render();
-	}
-
-	/**
 	 * Method to escape output.
 	 *
 	 * @param   string  $output  The output to escape.
@@ -158,31 +147,6 @@ abstract class HtmlView extends AbstractView
 	public function getLayout()
 	{
 		return $this->layout;
-	}
-
-	/**
-	 * Method to get the renderer object.
-	 *
-	 * @return  RendererInterface  The renderer object.
-	 *
-	 * @since   1.0
-	 */
-	public function getRenderer()
-	{
-		return $this->renderer;
-	}
-
-	/**
-	 * Method to render the view.
-	 *
-	 * @return  string  The rendered view.
-	 *
-	 * @since   1.0
-	 * @throws  \RuntimeException
-	 */
-	public function render()
-	{
-		return $this->renderer->render($this->layout);
 	}
 
 	/**
