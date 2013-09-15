@@ -68,9 +68,6 @@ abstract class HtmlView extends View implements ViewInterface
 		$templatePath = realpath($templatePath);
 		$basePath = $templatePath . '/' . $viewName;
 
-		// Register tracker's extension.
-		$renderer->addExtension(new AppExtension);
-
 		// Register additional paths.
 		$renderer->setTemplatesPaths(array($basePath, $templatePath, JPATH_TEMPLATES), true);
 

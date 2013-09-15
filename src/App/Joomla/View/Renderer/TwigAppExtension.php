@@ -18,7 +18,7 @@ use App\Joomla\Application\Application;
  *
  * @since  1.0
  */
-class AppExtension extends \Twig_Extension
+class TwigAppExtension extends \Twig_Extension
 {
 	/**
 	 * Returns the name of the extension.

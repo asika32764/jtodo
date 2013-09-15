@@ -76,9 +76,9 @@ class Twig extends \Twig_Environment implements RendererInterface
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function __construct()
+	public function __construct(TwigAppExtension $extension)
 	{
- 
+        
 		if (!empty($this->config['environment']['debug']))
 		{
 			//$this->addExtension(new \Twig_Extension_Debug);
@@ -94,6 +94,8 @@ class Twig extends \Twig_Environment implements RendererInterface
 		}
  
 		parent::__construct($this->twigLoader, $this->config['environment']);
+        
+        $this->addExtension(new $extension);
 	}
  
 	/**
@@ -232,14 +234,6 @@ class Twig extends \Twig_Environment implements RendererInterface
 			echo $e->getRawMessage();
 		}
 	}
-    
-    /**
-     * function getEngine
-     */
-    public function getEngine()
-    {
-        
-    }
  
 	/**
 	 * Get the current template name.
