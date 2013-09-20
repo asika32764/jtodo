@@ -86,9 +86,9 @@ class View extends AbstractView implements ViewInterface
 	 *
 	 * @since  1.0
 	 */
-	public function get($key, $default)
+	public function get($key)
 	{
-		return $this->getData()->$key ?: $default;
+		return $this->getData()->$key;
 	}
 	
 	/**
@@ -120,9 +120,7 @@ class View extends AbstractView implements ViewInterface
 			$type = substr($name, 0, -8);
 		}
 		
-		strtolower($type);
-		
-        $this->renderer[$type] = $renderer;
+        $this->renderer[strtolower($type)] = $renderer;
 		
 		return $this;
     }
@@ -138,14 +136,12 @@ class View extends AbstractView implements ViewInterface
 	{
 		strtolower($type);
 		
-		if($type)
+		if($type && !empty($this->renderer[$type]))
 		{
 			return $this->renderer[$type];
 		}
 		
-		$key = key($this->renderer);
-		
-		return $this->renderer[$key];
+		return $this->renderer[key($this->renderer)];
 	}
 	
 	/**
@@ -248,7 +244,7 @@ class View extends AbstractView implements ViewInterface
      */
     public function getReflection()
     {
-        if($this->reflection)
+        if($this->reflection instanceof \ReflectionClass)
         {
            return $this->reflection; 
         }
@@ -281,7 +277,7 @@ class View extends AbstractView implements ViewInterface
 	 */
 	public function render()
 	{
-		return $this->layoutHandler->render($this->data, $this->layout);
+		return $this->getLayoutHandler()->render($this->getDate(), $this->getlayout());
 	}
     
     /**
