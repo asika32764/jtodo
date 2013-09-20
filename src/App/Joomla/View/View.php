@@ -10,16 +10,11 @@ namespace App\Joomla\View;
 
 use Joomla\View\AbstractView;
 use Joomla\Model\ModelInterface;
-use Joomla\Factory;
-use Joomla\Language\Text;
 use Joomla\Data\DataObject;
 
+use App\Joomla\View\ViewInterface;
 use App\Joomla\View\Layout\Layout;
 use App\Joomla\View\Renderer\RendererInterface;
-use App\Joomla\View\Renderer\AppExtension;
-use App\Joomla\View\ViewInterface;
-
-//use JTracker\Model\TrackerDefaultModel;
 
 /**
  * Default view class for the Tracker application

@@ -8,7 +8,6 @@
 
 namespace Component\Todo\View\Categories;
 
-use App\Joomla\View\View;
 use App\Joomla\View\HtmlView;
 use App\Joomla\View\Renderer\TwigRenderer;
 use App\Joomla\View\Layout\Layout;

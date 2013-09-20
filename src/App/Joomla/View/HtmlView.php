@@ -8,27 +8,17 @@
 
 namespace App\Joomla\View;
 
-use Joomla\Factory;
-use Joomla\Language\Text;
 use Joomla\Model\ModelInterface;
 
-use Joomla\View\Layout\LayoutInterface;
-use Joomla\Filesystem\Path\PathLocator;
-use Joomla\Filesystem\Path\PathCollection;
-
-use App\Joomla\Application\TrackerApplication;
 use App\Joomla\View\View;
-use App\Joomla\View\ViewInterface;
 use App\Joomla\View\Renderer\RendererInterface;
-use App\Joomla\View\Renderer\AppExtension;
-use App\Joomla\View\Layout\Layout;
 
 /**
  * Abstract HTML view class for the Tracker application
  *
  * @since  1.0
  */
-abstract class HtmlView extends View implements ViewInterface
+abstract class HtmlView extends View
 {
 	public $templatePaths = array();
 	
@@ -45,7 +35,7 @@ abstract class HtmlView extends View implements ViewInterface
 	{
 		parent::__construct($model, $renderer);
 		
-		$app = Factory::$application;
+		$app = \Joomla\Factory::$application;
 		
 		$templatePath = $this->getPath() . '/../../Template' ;
 		$templatePath = realpath($templatePath);
