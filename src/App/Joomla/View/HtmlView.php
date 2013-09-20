@@ -41,9 +41,9 @@ abstract class HtmlView extends View implements ViewInterface
 	 * @throws  \RuntimeException
 	 * @since   1.0
 	 */
-	public function __construct(ModelInterface $model = null, RendererInterface $renderer = null, LayoutInterface $layout = null)
+	public function __construct(ModelInterface $model = null, RendererInterface $renderer = null)
 	{
-		parent::__construct($model, $renderer, $layout);
+		parent::__construct($model, $renderer);
 		
 		$app = Factory::$application;
 		
@@ -53,25 +53,17 @@ abstract class HtmlView extends View implements ViewInterface
 		$basePath = $templatePath . '/' . $this->getName();
 		
 		// Set Template paths
-		$this->templatePaths = new PathCollection(array(
-			'Self'      => new PathLocator($basePath),
-			'Component' => new PathLocator($templatePath),
-			'Global'    => new PathLocator(JPATH_TEMPLATES)
-		));
+		$this->templatePaths = array(
+			'Self'      => $basePath,
+			'Component' => $templatePath,
+			'Global'    => JPATH_TEMPLATES
+		);
 		
-		if(!$layout)
-		{
-			$layout = new Layout($this->templatePaths);
-		}
-		
-		$layout->setRenderer($renderer);
-		$this->layoutHandler = $layout;
-
 		// Retrieve and clear the message queue
 		//$this->set('flashBag', $app->getMessageQueue());
 		//$app->clearMessageQueue();
 		
-		$this->renderer = $renderer;
+		$this->setRenderer($renderer);
 	}
 
 	/**
@@ -97,9 +89,9 @@ abstract class HtmlView extends View implements ViewInterface
 	 *
 	 * @return  string
 	 */
-	public function getTemplatePath()
+	public function getTemplatePaths()
 	{
-		return $this->templatePath;
+		return $this->templatePaths;
 	}
 	
 	/**
@@ -110,5 +102,27 @@ abstract class HtmlView extends View implements ViewInterface
 		$this->templatePaths = $path;
 	}
 	
-	
+	/**
+	 * render description
+	 *
+	 * @param  string
+	 * @param  string
+	 * @param  string
+	 *
+	 * @return  string  renderReturn
+	 *
+	 * @since  1.0
+	 */
+	public function render()
+	{
+		// Layout
+		$layout = $this->getLayoutHandler($this->getLayout());
+		
+		// TODO: move all template setting to layout object
+		$layout->setPaths($this->getTemplatePaths());
+		
+		$layout->setRenderer($this->getRenderer());
+		
+		return $layout->render($this->getData());
+	}
 }

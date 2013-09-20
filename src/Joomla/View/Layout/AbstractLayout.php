@@ -17,20 +17,7 @@ use App\Joomla\View\Renderer\RendererInterface;
  * @since  1.0
  */
 class AbstractLayout implements LayoutInterface
-{
-    /**
-     * Method to instantiate the file-based layout.
-     *
-     * @param   string  $layoutId  Dot separated path to the layout file, relative to base path
-     * @param   string  $basePath  Base path to use when loading layout files
-     *
-     * @since   1.0
-     */
-    public function __construct($name, $paths = array())
-    {
-        $this->paths = $paths;
-    }
-    
+{ 
     /**
      * Method to escape output.
      *

@@ -12,6 +12,7 @@ use Joomla\View\AbstractView;
 use Joomla\Model\ModelInterface;
 use Joomla\Factory;
 use Joomla\Language\Text;
+use Joomla\Data\DataObject;
 
 use App\Joomla\View\Layout\Layout;
 use App\Joomla\View\Renderer\RendererInterface;
@@ -40,6 +41,8 @@ class View extends AbstractView implements ViewInterface
     protected $path;
     
     protected $namespace;
+	
+	protected $data;
     
     /**
      * function getModel
@@ -48,13 +51,82 @@ class View extends AbstractView implements ViewInterface
     {
         return $this->model;
     }
+	
+	/**
+     * function getModel
+     */
+    public function setModel($model)
+    {
+        $this->model = $model;
+		
+		return $this;
+    }
+	
+	/**
+	 * set description
+	 *
+	 * @param  string
+	 * @param  string
+	 * @param  string
+	 *
+	 * @return  string  setReturn
+	 *
+	 * @since  1.0
+	 */
+	public function set($key, $value)
+	{
+		$this->getData()->$key = $value;
+		
+		return $this;
+	}
+	
+	/**
+	 * get description
+	 *
+	 * @param  string
+	 * @param  string
+	 * @param  string
+	 *
+	 * @return  string  getReturn
+	 *
+	 * @since  1.0
+	 */
+	public function get($key, $default)
+	{
+		return $this->getData()->$key ?: $default;
+	}
+	
+	/**
+	 * getData description
+	 *
+	 * @param  string
+	 * @param  string
+	 * @param  string
+	 *
+	 * @return  string  getDataReturn
+	 *
+	 * @since  1.0
+	 */
+	public function getData()
+	{
+		return $this->data ?: new DataObject();
+	}
     
     /**
      * function setRenderer
      */
-    public function setRenderer(RendererInterface $renderer)
+    public function setRenderer(RendererInterface $renderer, $type = null)
     {
-        $this->renderer = $renderer;
+		if(!$type)
+		{
+			$ref = new \ReflectionClass($renderer);
+			$name = $ref->getShortName();
+			$type = substr($name, 0, -8);
+		}
+		
+		strtolower($type);
+		
+        $this->renderer[$type] = $renderer;
 		
 		return $this;
     }
@@ -66,9 +138,18 @@ class View extends AbstractView implements ViewInterface
 	 *
 	 * @since   1.0
 	 */
-	public function getRenderer()
+	public function getRenderer($type = null)
 	{
-		return $this->renderer;
+		strtolower($type);
+		
+		if($type)
+		{
+			return $this->renderer[$type];
+		}
+		
+		$key = key($this->renderer);
+		
+		return $this->renderer[$key];
 	}
 	
 	/**
@@ -80,7 +161,7 @@ class View extends AbstractView implements ViewInterface
 	 */
 	public function getLayout()
 	{
-		return $this->layout;
+		return $this->layout ?: 'default';
 	}
 
 	/**
@@ -106,9 +187,16 @@ class View extends AbstractView implements ViewInterface
 	 *
 	 * @since   1.0
 	 */
-	public function getLayoutHandler()
+	public function getLayoutHandler($layoutName = null)
 	{
-		return $this->layoutHandler;
+		$layoutName = $layoutName ?: $this->getLayout();
+		
+		if(!empty($this->layoutHandler[$layoutName]))
+		{
+			return $this->layoutHandler[$layoutName];
+		}
+		
+		return $this->layoutHandler[$layoutName] = new Layout($layoutName);
 	}
 
 	/**
@@ -120,9 +208,9 @@ class View extends AbstractView implements ViewInterface
 	 *
 	 * @since   1.0
 	 */
-	public function setLayoutHandler($handler)
+	public function setLayoutHandler(LayoutInterface $handler, $layoutName = null)
 	{
-		$this->layoutHandler = $handler;
+		$this->layoutHandler[$layoutName ?: $handler->getName()] = $handler;
 
 		return $this;
 	}
