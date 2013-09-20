@@ -17,7 +17,7 @@ use Joomla\Filesystem\Path\PathLocatorInterface;
  *
  * @since  1.0
  */
-class PathCollection extends \ArrayObject implements \IteratorAggregate
+class PathCollection extends \ArrayObject
 {
     /**
      * Paths bag.
@@ -36,6 +36,8 @@ class PathCollection extends \ArrayObject implements \IteratorAggregate
 	public function __construct($paths = array())
 	{
 		$this->addPaths($paths);
+		
+		parent::__construct($paths);
 	}
 	
 	/**
@@ -158,20 +160,6 @@ class PathCollection extends \ArrayObject implements \IteratorAggregate
 		}
 		
 		return $this->paths[$key];
-	}
-	
-	/**
-	 * Get an iterator of paths, that we can put this object into a foreach, and get every path.
-	 * 
-	 * If you want to scan all files or dirs of these paths, use `$this->getFiles()` and `$this->getFolders()`.
-	 *
-	 * @return  \ArrayObject  The array which travable.
-	 *
-	 * @since  1.0
-	 */
-	public function getIterator()
-	{
-		return new \ArrayObject($this->paths);
 	}
 	
 	/**
