@@ -12,11 +12,16 @@ use Joomla\Factory;
 use Joomla\Language\Text;
 use Joomla\Model\ModelInterface;
 
-use App\Joomla\View\Renderer\RendererInterface;
+use Joomla\View\Layout\LayoutInterface;
+use Joomla\Filesystem\Path\PathLocator;
+use Joomla\Filesystem\Path\PathCollection;
+
 use App\Joomla\Application\TrackerApplication;
 use App\Joomla\View\View;
 use App\Joomla\View\ViewInterface;
+use App\Joomla\View\Renderer\RendererInterface;
 use App\Joomla\View\Renderer\AppExtension;
+use App\Joomla\View\Layout\Layout;
 
 /**
  * Abstract HTML view class for the Tracker application
@@ -25,25 +30,7 @@ use App\Joomla\View\Renderer\AppExtension;
  */
 abstract class HtmlView extends View implements ViewInterface
 {
-	/**
-	 * The view layout.
-	 *
-	 * @var    string
-	 * @since  1.0
-	 */
-	protected $layout = 'index';
-
-	/**
-	 * The view template engine.
-	 *
-	 * @var    RendererInterface
-	 * @since  1.0
-	 */
-	protected $renderer = null;
-
-	public $templatePath;
-	
-	
+	public $templatePaths = array();
 	
 	/**
 	 * Method to instantiate the view.
@@ -54,25 +41,35 @@ abstract class HtmlView extends View implements ViewInterface
 	 * @throws  \RuntimeException
 	 * @since   1.0
 	 */
-	public function __construct(ModelInterface $model = null, RendererInterface $renderer = null)
+	public function __construct(ModelInterface $model = null, RendererInterface $renderer = null, LayoutInterface $layout = null)
 	{
-		parent::__construct($model, $renderer);
-
-		/* @type TrackerApplication $app */
+		parent::__construct($model, $renderer, $layout);
+		
 		$app = Factory::$application;
 		
-		// Set Template paths
 		$templatePath = $this->getPath() . '/../../Template' ;
 		$templatePath = realpath($templatePath);
 		
 		$basePath = $templatePath . '/' . $this->getName();
-
-		// Register additional paths.
-		$renderer->setTemplatesPaths(array($basePath, $templatePath, JPATH_TEMPLATES), true);
+		
+		// Set Template paths
+		$this->templatePaths = new PathCollection(array(
+			'Self'      => new PathLocator($basePath),
+			'Component' => new PathLocator($templatePath),
+			'Global'    => new PathLocator(JPATH_TEMPLATES)
+		));
+		
+		if(!$layout)
+		{
+			$layout = new Layout($this->templatePaths);
+		}
+		
+		$layout->setRenderer($renderer);
+		$this->layoutHandler = $layout;
 
 		// Retrieve and clear the message queue
-		$renderer->set('flashBag', $app->getMessageQueue());
-		$app->clearMessageQueue();
+		//$this->set('flashBag', $app->getMessageQueue());
+		//$app->clearMessageQueue();
 		
 		$this->renderer = $renderer;
 	}
@@ -92,34 +89,6 @@ abstract class HtmlView extends View implements ViewInterface
 		// Escape the output.
 		return htmlspecialchars($output, ENT_COMPAT, 'UTF-8');
 	}
-
-	/**
-	 * Method to get the view layout.
-	 *
-	 * @return  string  The layout name.
-	 *
-	 * @since   1.0
-	 */
-	public function getLayout()
-	{
-		return $this->layout;
-	}
-
-	/**
-	 * Method to set the view layout.
-	 *
-	 * @param   string  $layout  The layout name.
-	 *
-	 * @return  $this  Method supports chaining
-	 *
-	 * @since   1.0
-	 */
-	public function setLayout($layout)
-	{
-		$this->layout = $layout;
-
-		return $this;
-	}
 	
 	/**
 	 * Method to get template base path.
@@ -136,8 +105,10 @@ abstract class HtmlView extends View implements ViewInterface
 	/**
 	 * function setTemplatePath
 	 */
-	public function setTemplatePath($path)
+	public function setTemplatePaths($path)
 	{
-		$this->templatePath = $path;
+		$this->templatePaths = $path;
 	}
+	
+	
 }

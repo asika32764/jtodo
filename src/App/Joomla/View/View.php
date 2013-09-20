@@ -10,10 +10,10 @@ namespace App\Joomla\View;
 
 use Joomla\View\AbstractView;
 use Joomla\Model\ModelInterface;
-
 use Joomla\Factory;
 use Joomla\Language\Text;
 
+use App\Joomla\View\Layout\Layout;
 use App\Joomla\View\Renderer\RendererInterface;
 use App\Joomla\View\Renderer\AppExtension;
 use App\Joomla\View\ViewInterface;
@@ -28,6 +28,10 @@ use App\Joomla\View\ViewInterface;
 class View extends AbstractView implements ViewInterface
 {
     protected $renderer;
+	
+	protected $layoutHandler;
+	
+	protected $layout;
     
     protected $reflection;
     
@@ -51,6 +55,8 @@ class View extends AbstractView implements ViewInterface
     public function setRenderer(RendererInterface $renderer)
     {
         $this->renderer = $renderer;
+		
+		return $this;
     }
     
     /**
@@ -63,6 +69,62 @@ class View extends AbstractView implements ViewInterface
 	public function getRenderer()
 	{
 		return $this->renderer;
+	}
+	
+	/**
+	 * Method to get the view layout.
+	 *
+	 * @return  string  The layout name.
+	 *
+	 * @since   1.0
+	 */
+	public function getLayout()
+	{
+		return $this->layout;
+	}
+
+	/**
+	 * Method to set the view layout.
+	 *
+	 * @param   string  $layout  The layout name.
+	 *
+	 * @return  $this  Method supports chaining
+	 *
+	 * @since   1.0
+	 */
+	public function setLayout($layout)
+	{
+		$this->layout = $layout;
+
+		return $this;
+	}
+	
+	/**
+	 * Method to get the view layout.
+	 *
+	 * @return  string  The layout name.
+	 *
+	 * @since   1.0
+	 */
+	public function getLayoutHandler()
+	{
+		return $this->layoutHandler;
+	}
+
+	/**
+	 * Method to set the view layout.
+	 *
+	 * @param   string  $layout  The layout name.
+	 *
+	 * @return  $this  Method supports chaining
+	 *
+	 * @since   1.0
+	 */
+	public function setLayoutHandler($handler)
+	{
+		$this->layoutHandler = $handler;
+
+		return $this;
 	}
     
     /**
@@ -135,7 +197,7 @@ class View extends AbstractView implements ViewInterface
 	 */
 	public function render()
 	{
-		return $this->renderer->render($this->layout);
+		return $this->layoutHandler->render($this->data, $this->layout);
 	}
     
     /**

@@ -16,7 +16,7 @@ use App\Joomla\View\Renderer\RendererInterface;
  *
  * @since  1.0
  */
-class Twig extends \Twig_Environment implements RendererInterface
+class TwigRenderer extends \Twig_Environment implements RendererInterface
 {
     /**
 	 * The renderer default configuration parameters.

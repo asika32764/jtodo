@@ -9,7 +9,7 @@
 namespace Component\Todo\View\Category;
 
 use App\Joomla\View\HtmlView;
-use App\Joomla\View\Renderer\Twig;
+use App\Joomla\View\Renderer\TwigRenderer;
 
 use Component\Todo\Model\CategoryModel;
  
@@ -18,7 +18,7 @@ class CategoryHtmlView extends HtmlView
     /**
      * function __construct
      */
-    public function __construct(CategoryModel $model, Twig $renderer)
+    public function __construct(CategoryModel $model, TwigRenderer $renderer)
     {
         parent::__construct($model, $renderer);
     }
