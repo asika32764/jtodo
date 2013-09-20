@@ -132,7 +132,7 @@ class Layout extends AbstractLayout
      */
     public function render($data = array())
     {
-        $this->renderer->addPath($this->paths->toArray());
+        $this->renderer->setTemplatesPaths($this->paths->toArray());
         
         return $this->getRenderer()->render($this->name, (array) $data->dump());
     }

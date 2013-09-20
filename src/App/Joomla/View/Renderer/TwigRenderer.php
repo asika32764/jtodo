@@ -8,6 +8,8 @@
  
 namespace App\Joomla\View\Renderer;
  
+use Joomla\Registry\Registry;
+ 
 use App\Joomla\View\Renderer\Twig\FilesystemLoader;
 use App\Joomla\View\Renderer\RendererInterface;
  
@@ -25,14 +27,8 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 * @since  1.0
 	 */
 	private $config = array(
-		'templates_base_dir' => 'templates/',
 		'template_file_ext'  => '.twig',
 		'twig_cache_dir'     => 'cache/twig/',
-		'delimiters'         => array(
-			'tag_comment'    => array('{#', '#}'),
-			'tag_block'      => array('{%', '%}'),
-			'tag_variable'   => array('{{', '}}')
-		),
 		'environment'        => array()
 	);
  
@@ -78,10 +74,11 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 */
 	public function __construct(TwigAppExtension $extension)
 	{
+        $this->config = new Registry($this->config);
         
-		if (!empty($this->config['environment']['debug']))
+		if (!$this->config->get('environment.debug'))
 		{
-			//$this->addExtension(new \Twig_Extension_Debug);
+			$this->addExtension(new \Twig_Extension_Debug);
 		}
  
 		try
@@ -93,7 +90,7 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 			throw new \RuntimeException($e->getRawMessage());
 		}
  
-		parent::__construct($this->twigLoader, $this->config['environment']);
+		parent::__construct($this->twigLoader, $this->config->get('environment'));
         
         $this->addExtension(new $extension);
 	}
@@ -105,15 +102,21 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 *
 	 * @since   1.0
 	 */
+    /*
 	public function getLexer()
 	{
 		if (null === $this->lexer)
 		{
-			$this->lexer = new \Twig_Lexer($this, $this->config['delimiters']);
+			$this->lexer = new \Twig_Lexer($this, array(
+                'tag_comment'    => array('{#', '#}'),
+                'tag_block'      => array('{%', '%}'),
+                'tag_variable'   => array('{{', '}}')
+            ));
 		}
  
 		return $this->lexer;
 	}
+	*/
  
 	/**
 	 * Set the data for the renderer.
@@ -256,9 +259,18 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 *
 	 * @since   1.0
 	 */
-	public function addPath($path)
+	public function addPath($path, $name = null)
 	{
-		return $this->setTemplatesPaths($path, true);
+		try
+        {
+            $this->twigLoader->addPath($path, $name);
+        }
+        catch (\Twig_Error_Loader $e)
+        {
+            echo $e->getRawMessage();
+        }
+        
+        return $this;
 	}
  
 	/**
@@ -287,36 +299,17 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 *
 	 * @since   1.0
 	 */
-	public function setTemplatesPaths($paths, $overrideBaseDir = false)
+	public function setTemplatesPaths($paths, $overrideBaseDir = true)
 	{
-		if (!is_array($paths))
-		{
-			$paths = array($paths);
-		}
- 
-		foreach ($paths as $path)
-		{
-			if ($overrideBaseDir)
-			{
-				$this->templatesPaths[] = $path;
-			}
-			else
-			{
-				$this->templatesPaths[] = $this->config['templates_base_dir'] . $path;
-			}
-		}
-
 		// Reset the paths if needed.
 		if (is_object($this->twigLoader))
 		{
-			try
-			{
-				$this->twigLoader->setPaths($this->templatesPaths);
-			}
-			catch (\Twig_Error_Loader $e)
-			{
-				echo $e->getRawMessage();
-			}
+            foreach($paths as $key => $path)
+            {
+                $this->addPath($path, $key);
+            }
+            
+            $this->twigLoader->setPaths(array($paths['Self']));
 		}
  
 		return $this;

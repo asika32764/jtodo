@@ -31,7 +31,7 @@ class CategoriesHtmlView extends HtmlView
     {
         $categories = $this->model->getCategories();
         
-        $this->renderer->set('categories', $categories);
+        $this->set('categories', $categories);
         
         return parent::render();
     }

@@ -17,7 +17,7 @@ use Joomla\Filesystem\Path\PathLocatorInterface;
  *
  * @since  1.0
  */
-class PathCollection implements \IteratorAggregate
+class PathCollection extends \ArrayObject implements \IteratorAggregate
 {
     /**
      * Paths bag.
@@ -364,13 +364,20 @@ class PathCollection implements \IteratorAggregate
 	 *
 	 * @since  1.0
 	 */
-	public function toArray()
+	public function toArray($reindex = false)
 	{
 		$array = array();
 		
-		foreach($this->paths as $path)
+		foreach($this->paths as $key => $path)
 		{
-			$array[] = (string) clone $path;
+			if($reindex)
+			{
+				$array[] = (string) clone $path;
+			}
+			else
+			{
+				$array[$key] = (string) clone $path;
+			}
 		}
 		
 		return $array;

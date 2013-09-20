@@ -104,7 +104,8 @@ class View extends AbstractView implements ViewInterface
 	 */
 	public function getData()
 	{
-		return $this->data ?: new DataObject();
+		$this->data = $this->data ?: new DataObject();
+		return $this->data;
 	}
     
     /**
