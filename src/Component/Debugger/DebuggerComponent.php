@@ -56,19 +56,21 @@ class DebuggerComponent extends Component implements LoggerAwareInterface
 	 * @since  1.0
 	 */
 	private $logger;
-
+	
 	/**
-	 * Constructor.
+	 * registerDegugger description
 	 *
-	 * @param   TrackerApplication  $application  The application
+	 * @param  string
+	 * @param  string
+	 * @param  string
 	 *
-	 * @since   1.0
+	 * @return  string  registerDeguggerReturn
+	 *
+	 * @since  1.0
 	 */
-	public function __construct(Application $application, \Joomla\DI\Container $container)
+	public function registerDebugger()
 	{
-		parent::__construct($application, $container);
-
-		$this->profiler = $application->getProfiler();
+		$this->profiler = $this->application->getProfiler();
 
 		$this->setupLogging();
 

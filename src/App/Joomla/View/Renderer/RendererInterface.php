@@ -46,7 +46,7 @@ interface RendererInterface
 	 *
 	 * @since   1.0
 	 */
-	public function setTemplatesPaths($paths, $overrideBaseDir = false);
+	public function setPaths($paths, $overrideBaseDir = false);
 
 	/**
 	 * Set the templates location paths.
@@ -69,7 +69,7 @@ interface RendererInterface
 	 *
 	 * @since   1.0
 	 */
-	public function set($key, $value);
+	public function set($key, $value = null);
 
 	/**
 	 * Unset a particular variable.

@@ -9,17 +9,22 @@
 namespace App\Joomla\View\Renderer;
  
 use Joomla\Registry\Registry;
+use Joomla\Data\DataObject;
+use Joomla\Filesystem\Path\PathCollection;
  
 use App\Joomla\View\Renderer\Twig\FilesystemLoader;
 use App\Joomla\View\Renderer\RendererInterface;
+
  
 /**
  * Twig class for rendering output.
  *
  * @since  1.0
  */
-class TwigRenderer extends \Twig_Environment implements RendererInterface
+class TwigRenderer implements RendererInterface
 {
+    const PASS_AS_GLOBAL = true;
+    
     /**
 	 * The renderer default configuration parameters.
 	 *
@@ -31,6 +36,8 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 		'twig_cache_dir'     => 'cache/twig/',
 		'environment'        => array()
 	);
+    
+    private $twig = array();
  
 	/**
 	 * The data for the renderer.
@@ -39,6 +46,14 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 * @since  1.0
 	 */
 	private $data = array();
+    
+    /**
+	 * The data for the renderer.
+	 *
+	 * @var    array
+	 * @since  1.0
+	 */
+	private $global = array();
  
 	/**
 	 * The templates location paths.
@@ -46,7 +61,7 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 * @var    array
 	 * @since  1.0
 	 */
-	private $templatesPaths = array();
+	private $templatePaths = array();
  
 	/**
 	 * Current template name.
@@ -72,67 +87,125 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function __construct(TwigAppExtension $extension)
+	public function __construct(TwigAppExtension $extension, DataObject $data = null, PathCollection $paths = null)
 	{
-        $this->config = new Registry($this->config);
+        $this->extension = $extension;
         
-		if (!$this->config->get('environment.debug'))
+        $this->data = $data;
+        
+        $this->templatePaths = $paths;
+        
+        $this->global = new DataObject();
+	}
+    
+    /**
+	 * Render and return compiled HTML.
+	 *
+	 * @param   string  $template  The template file name
+	 * @param   mixed   $data      The data to pass to the template
+	 *
+	 * @return  string  compiled HTML
+	 *
+	 * @since   1.0
+	 */
+	public function render($template = '', array $data = array())
+    {
+        $twig     = $this->getTwig();
+        $loader   = $twig->getLoader();
+        
+        // Prepare data
+        $template = $template ?: $this->template;
+        $this->set($data);
+        
+        // Set templates
+        $paths    = $this->templatePaths;
+        $basepath = $paths[key($paths)];
+        
+        // Add paths
+        $loader->addPath($basepath);
+        
+        foreach($paths as $key => $path)
+        {
+            $loader->addPath((string) $path, $key);
+        }
+        
+        try
 		{
-			$this->addExtension(new \Twig_Extension_Debug);
-		}
- 
-		try
-		{
-			$this->twigLoader = new FilesystemLoader();
+			return $twig->render($template . $this->config->get('template_file_ext'), (array) $this->data->dump());
 		}
 		catch (\Twig_Error_Loader $e)
 		{
 			throw new \RuntimeException($e->getRawMessage());
 		}
- 
-		parent::__construct($this->twigLoader, $this->config->get('environment'));
-        
-        $this->addExtension(new $extension);
-	}
- 
+    }
+
 	/**
-	 * Get the Lexer instance.
+	 * Set the template.
 	 *
-	 * @return  \Twig_LexerInterface  A Twig_LexerInterface instance.
+	 * @param   string  $name  The name of the template file.
+	 *
+	 * @return  RendererInterface
 	 *
 	 * @since   1.0
 	 */
-    /*
-	public function getLexer()
-	{
-		if (null === $this->lexer)
-		{
-			$this->lexer = new \Twig_Lexer($this, array(
-                'tag_comment'    => array('{#', '#}'),
-                'tag_block'      => array('{%', '%}'),
-                'tag_variable'   => array('{{', '}}')
-            ));
-		}
- 
-		return $this->lexer;
-	}
-	*/
- 
+	public function setTemplate($name)
+    {
+        $this->template = $name;
+    }
+
 	/**
-	 * Set the data for the renderer.
+	 * Sets the paths where templates are stored.
 	 *
-	 * @param   mixed    $key     The variable name or an array of variable names with values.
-	 * @param   mixed    $value   The value.
-	 * @param   boolean  $global  Is this a global variable?
+	 * @param   string|array  $paths            A path or an array of paths where to look for templates.
+	 * @param   bool          $overrideBaseDir  If true a path can be outside themes base directory.
 	 *
-	 * @return  Twig  Method supports chaining.
+	 * @return  RendererInterface
 	 *
 	 * @since   1.0
-	 * @throws  \InvalidArgumentException
+	 */
+	public function setPaths($paths, $overrideBaseDir = false)
+    {
+        $paths = (array) $paths;
+        
+        $this->templatePaths = new PathCollection($paths);
+        
+        if($overrideBaseDir)
+        {
+            $this->templatePaths->setPrefix($this->config->get('template_base_dir'));
+        }
+        
+        return $this;
+    }
+
+	/**
+	 * Set the templates location paths.
+	 *
+	 * @param   string  $path  Templates location path.
+	 *
+	 * @return  RendererInterface
+	 *
+	 * @since   1.0
+	 */
+	public function addPath($path, $key = null)
+    {
+        $this->templatePaths->addPath($path, $name);
+        
+        return $this;
+    }
+
+	/**
+	 * Set the data.
+	 *
+	 * @param   mixed  $key    The variable name or an array of variable names with values.
+	 * @param   mixed  $value  The value.
+	 *
+	 * @return  RendererInterface
+	 *
+	 * @since   1.0
 	 */
 	public function set($key, $value = null, $global = false)
-	{
-		if (is_array($key))
+    {
+        if (is_array($key))
 		{
 			foreach ($key as $k => $v)
 			{
@@ -141,189 +214,83 @@ class TwigRenderer extends \Twig_Environment implements RendererInterface
 		}
 		else
 		{
-			if (!isset($value))
+			if (!$value)
 			{
 				throw new \InvalidArgumentException('No value defined.');
 			}
  
 			if ($global)
 			{
-				$this->addGlobal($key, $value);
+				$this->getTwig()->addGlobal($key, $value);
 			}
 			else
 			{
-				$this->data[$key] = $value;
+				$this->data->$key = $value;
 			}
 		}
- 
-		return $this;
-	}
- 
+        
+        return $this;
+    }
+
 	/**
 	 * Unset a particular variable.
 	 *
-	 * @param   mixed  $key  The variable name.
+	 * @param   mixed  $key  The variable name
 	 *
-	 * @return  Twig  Method supports chaining.
+	 * @return  RendererInterface
 	 *
 	 * @since   1.0
 	 */
 	public function unsetData($key)
-	{
-		return $this->unsetData($key);
-	}
- 
-	/**
-	 * Render and return compiled HTML.
-	 *
-	 * @param   string  $template  The template file name.
-	 * @param   array   $data      An array of data to pass to the template.
-	 *
-	 * @return  string  Compiled HTML.
-	 *
-	 * @since   1.0
-	 * @throws  \RuntimeException
-	 */
-	public function render($template = '', array $data = array())
-	{
-		if (!empty($template))
+    {
+        unset($this->data->$key);
+        
+        return $this;
+    }
+    
+    /**
+     * loadTwig description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  loadTwigReturn
+     *
+     * @since  1.0
+     */
+    protected function getTwig()
+    {
+        if($this->twig)
+        {
+            return $this->twig;
+        }
+        
+        $this->config = new Registry($this->config);
+        
+        if ($this->config->get('environment.debug'))
 		{
-			$this->setTemplate($template);
+			$this->addExtension(new \Twig_Extension_Debug);
 		}
- 
-		if (!empty($data))
+        
+        try
 		{
-			$this->set($data);
-		}
- 
-		try
-		{
-			return $this->load()->render($this->data);
+			$this->twigLoader = new FilesystemLoader();
 		}
 		catch (\Twig_Error_Loader $e)
 		{
 			throw new \RuntimeException($e->getRawMessage());
 		}
-	}
- 
-	/**
-	 * Display the compiled HTML content.
-	 *
-	 * @param   string  $template  The template file name.
-	 * @param   array   $data      An array of data to pass to the template.
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0
-	 */
-	public function display($template = '', array $data = array())
-	{
-		if (!empty($template))
-		{
-			$this->setTemplate($template);
-		}
- 
-		if (!empty($data))
-		{
-			$this->set($data);
-		}
- 
-		try
-		{
-			$this->load()->display($this->data);
-		}
-		catch (\Twig_Error_Loader $e)
-		{
-			echo $e->getRawMessage();
-		}
-	}
- 
-	/**
-	 * Get the current template name.
-	 *
-	 * @return  string  The name of the currently loaded template file (without the extension).
-	 *
-	 * @since   1.0
-	 */
-	public function getTemplate()
-	{
-		return $this->template;
-	}
- 
-	/**
-	 * Add a path to the templates location array.
-	 *
-	 * @param   string  $path  Templates location path.
-	 *
-	 * @return  $this
-	 *
-	 * @since   1.0
-	 */
-	public function addPath($path, $name = null)
-	{
-		try
-        {
-            $this->twigLoader->addPath($path, $name);
-        }
-        catch (\Twig_Error_Loader $e)
-        {
-            echo $e->getRawMessage();
-        }
         
-        return $this;
-	}
- 
-	/**
-	 * Set the template.
-	 *
-	 * @param   string  $name  The name of the template file.
-	 *
-	 * @return  Twig  Method supports chaining.
-	 *
-	 * @since   1.0
-	 */
-	public function setTemplate($name)
-	{
-		$this->template = $name;
- 
-		return $this;
-	}
- 
-	/**
-	 * Sets the paths where templates are stored.
-	 *
-	 * @param   string|array  $paths            A path or an array of paths where to look for templates.
-	 * @param   bool          $overrideBaseDir  If true a path can be outside themes base directory.
-	 *
-	 * @return  Twig
-	 *
-	 * @since   1.0
-	 */
-	public function setTemplatesPaths($paths, $overrideBaseDir = true)
-	{
-		// Reset the paths if needed.
-		if (is_object($this->twigLoader))
+        $twig = new \Twig_Environment($this->twigLoader, $this->config->get('environment'));
+        
+        if (!$this->config->get('environment.debug'))
 		{
-            foreach($paths as $key => $path)
-            {
-                $this->addPath($path, $key);
-            }
-            
-            $this->twigLoader->setPaths(array($paths['Self']));
+			$twig->addExtension(new \Twig_Extension_Debug);
 		}
- 
-		return $this;
-	}
- 
-	/**
-	 * Load the template and return an output object.
-	 *
-	 * @return  object  Output object.
-	 *
-	 * @since   1.0
-	 */
-	private function load()
-	{
-		return $this->loadTemplate($this->getTemplate() . $this->config['template_file_ext']);
-	}
+        
+        $twig->addExtension(new $this->extension);
+        
+        return $twig;
+    }
 }

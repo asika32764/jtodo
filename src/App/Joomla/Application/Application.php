@@ -177,7 +177,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
         $this->loadComponents();
         
         // Get Debugger
-        //$debugger = $this->container->get('component.debugger');
+        $debugger = $this->container->get('component.debugger')->registerDebugger();
         
         // Register the event dispatcher
         $this->loadDispatcher();
@@ -415,6 +415,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
         // load components into DI Container
         $container = $this->getContainer();
         $input = $this->input;
+        $application = $this;
         
         foreach($components as $key => $name)
         {
@@ -426,8 +427,8 @@ final class Application extends AbstractWebApplication implements ContainerAware
                 throw new \RuntimeException($class.' not found');
             }
             
-            $container->share('component.' . $key, function() use ($class, $input, $container) {
-                return new $class($container->get('application'), $input, $container);
+            $container->share('component.' . $key, function($container) use ($class, $input, $application) {
+                return new $class($application, $input, $container);
             });
         }
         

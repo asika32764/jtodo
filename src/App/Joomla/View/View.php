@@ -25,8 +25,6 @@ class View extends AbstractView implements ViewInterface
 {
     protected $renderer;
 	
-	protected $layoutHandler;
-	
 	protected $layout;
     
     protected $reflection;
@@ -113,14 +111,7 @@ class View extends AbstractView implements ViewInterface
      */
     public function setRenderer(RendererInterface $renderer, $type = null)
     {
-		if(!$type)
-		{
-			$ref = new \ReflectionClass($renderer);
-			$name = $ref->getShortName();
-			$type = substr($name, 0, -8);
-		}
-		
-        $this->renderer[strtolower($type)] = $renderer;
+        $this->renderer = $renderer;
 		
 		return $this;
     }
@@ -132,16 +123,9 @@ class View extends AbstractView implements ViewInterface
 	 *
 	 * @since   1.0
 	 */
-	public function getRenderer($type = null)
+	public function getRenderer()
 	{
-		strtolower($type);
-		
-		if($type && !empty($this->renderer[$type]))
-		{
-			return $this->renderer[$type];
-		}
-		
-		return $this->renderer[key($this->renderer)];
+		return $this->renderer;
 	}
 	
 	/**
@@ -168,41 +152,6 @@ class View extends AbstractView implements ViewInterface
 	public function setLayout($layout)
 	{
 		$this->layout = $layout;
-
-		return $this;
-	}
-	
-	/**
-	 * Method to get the view layout.
-	 *
-	 * @return  string  The layout name.
-	 *
-	 * @since   1.0
-	 */
-	public function getLayoutHandler($layoutName = null)
-	{
-		$layoutName = $layoutName ?: $this->getLayout();
-		
-		if(!empty($this->layoutHandler[$layoutName]))
-		{
-			return $this->layoutHandler[$layoutName];
-		}
-		
-		return $this->layoutHandler[$layoutName] = new Layout($layoutName);
-	}
-
-	/**
-	 * Method to set the view layout.
-	 *
-	 * @param   string  $layout  The layout name.
-	 *
-	 * @return  $this  Method supports chaining
-	 *
-	 * @since   1.0
-	 */
-	public function setLayoutHandler(LayoutInterface $handler, $layoutName = null)
-	{
-		$this->layoutHandler[$layoutName ?: $handler->getName()] = $handler;
 
 		return $this;
 	}
@@ -277,7 +226,7 @@ class View extends AbstractView implements ViewInterface
 	 */
 	public function render()
 	{
-		return $this->getLayoutHandler()->render($this->getDate(), $this->getlayout());
+		return $this->getRenderer()->render($this->getLayout(), (array) $this->getData()->dump());
 	}
     
     /**

@@ -22,7 +22,10 @@
 		"filp/whoops": "1.0.7"
 	},
     "autoload": {
-        "psr-0": { "": "src/" }
+        "psr-0": { "": "src/" },
+		"files": [
+            "src/App/Joomla/PHP/methods.php"
+        ]
     },
     "minimum-stability": "dev"
 }

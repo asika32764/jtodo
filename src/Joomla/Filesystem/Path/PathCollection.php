@@ -27,6 +27,13 @@ class PathCollection extends \ArrayObject
 	protected $paths = array();
 	
 	/**
+     * Paths bag.
+     *
+     * @var array 
+     */
+	protected $storage = array();
+	
+	/**
 	 * PathCollection constructor.
 	 *
 	 * @param  array  $paths  The PathLocator array.
@@ -37,7 +44,7 @@ class PathCollection extends \ArrayObject
 	{
 		$this->addPaths($paths);
 		
-		parent::__construct($paths);
+		//parent::__construct($paths);
 	}
 	
 	/**
@@ -92,11 +99,11 @@ class PathCollection extends \ArrayObject
 	public function addPath($path, $key = null)
 	{
 		if($key){
-			$this->paths[$key] = $path;
+			parent::offsetSet($key, $path);
 		}
 		else
 		{
-			$this->paths[] = $path;
+			parent::append($path);
 		}
 		
 		return $this;
@@ -113,7 +120,7 @@ class PathCollection extends \ArrayObject
 	 */
 	public function removePath($key)
 	{
-		unset($this->paths[$key]);
+		parent::offsetUnset($key);
 		
 		return $this;
 	}
@@ -127,7 +134,7 @@ class PathCollection extends \ArrayObject
 	 */
 	public function getPaths()
 	{
-		return $this->paths;
+		return parent::getArrayCopy();
 	}
 	
 	/**
@@ -144,7 +151,7 @@ class PathCollection extends \ArrayObject
 	 */
 	public function getPath($key, $default = null)
 	{
-		if(!isset($this->paths[$key]))
+		if(parent::offsetExists($key))
 		{
 			if(!$default)
 			{
@@ -159,7 +166,7 @@ class PathCollection extends \ArrayObject
 			return $default;
 		}
 		
-		return $this->paths[$key];
+		return parent::offsetGet($key);
 	}
 	
 	/**
@@ -175,14 +182,14 @@ class PathCollection extends \ArrayObject
 	{
 		$iterator = new \AppendIterator();
 		
-		$paths	= $this->paths;
+		$paths	= (array) parent::getArrayCopy();
 		
 		$callback = function($path) use($callback, $iterator)
 		{
 			return $iterator->append($callback($path));
 		};
 		
-		foreach($this->paths as $path)
+		foreach($this->storage as $path)
 		{
 			if($this->isSubdir($path)) continue;
 			$callback($path);
@@ -303,7 +310,7 @@ class PathCollection extends \ArrayObject
 	 */
 	public function setPrefix($prefix)
 	{
-		foreach($this->paths as &$path)
+		foreach($this as &$path)
 		{
 			$path->setPrefix((string) $prefix);
 		}
@@ -322,7 +329,7 @@ class PathCollection extends \ArrayObject
 	 */
 	public function appendAll($appended)
 	{
-		foreach($this->paths as &$path)
+		foreach($this as &$path)
 		{
 			$path->append($appended);
 		}
@@ -356,7 +363,7 @@ class PathCollection extends \ArrayObject
 	{
 		$array = array();
 		
-		foreach($this->paths as $key => $path)
+		foreach($this as $key => $path)
 		{
 			if($reindex)
 			{
@@ -384,7 +391,7 @@ class PathCollection extends \ArrayObject
 	 */
 	public function isSubdir($path)
 	{
-		foreach($this->paths as $member)
+		foreach($this as $member)
 		{
 			if($member->isSubdirOf($path))
 			{
@@ -393,5 +400,21 @@ class PathCollection extends \ArrayObject
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * __call description
+	 *
+	 * @param  string
+	 * @param  string
+	 * @param  string
+	 *
+	 * @return  string  __callReturn
+	 *
+	 * @since  1.0
+	 */
+	public function __call($name, $args)
+	{
+		return call_user_func_array(array(parent, $args));
 	}
 }

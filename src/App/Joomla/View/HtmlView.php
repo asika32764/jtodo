@@ -49,6 +49,8 @@ abstract class HtmlView extends View
 			'Global'    => JPATH_TEMPLATES
 		);
 		
+		$renderer->setPaths($this->templatePaths);
+		
 		// Retrieve and clear the message queue
 		//$this->set('flashBag', $app->getMessageQueue());
 		//$app->clearMessageQueue();
@@ -90,29 +92,5 @@ abstract class HtmlView extends View
 	public function setTemplatePaths($path)
 	{
 		$this->templatePaths = $path;
-	}
-	
-	/**
-	 * render description
-	 *
-	 * @param  string
-	 * @param  string
-	 * @param  string
-	 *
-	 * @return  string  renderReturn
-	 *
-	 * @since  1.0
-	 */
-	public function render()
-	{
-		// Layout
-		$layout = $this->getLayoutHandler($this->getLayout());
-		
-		// TODO: move all template setting to layout object
-		$layout->setPaths($this->getTemplatePaths());
-		
-		$layout->setRenderer($this->getRenderer());
-		
-		return $layout->render($this->getData());
 	}
 }

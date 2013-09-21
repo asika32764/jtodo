@@ -152,7 +152,7 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
         
         try
         {
-            $controllername = strtolower($this->getName()) . '.' . $name;
+            $controllername = 'component.' . strtolower($this->getName()) . '.' . $name;
             $controllername = !$action ? $controllername : $controllername . '.' . $action;
             $controller     = $container->get($controllername);
         }
@@ -162,7 +162,7 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
             
             $classname   = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
             
-            $input       = $input ?: $this->input;
+            $input       = $input ?: clone $this->input;
             
             $application = $this->application;
             
@@ -175,7 +175,6 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
                 
                 return $controller;
             });
-            
             
             $controller = $container->get($controllername);
         }
