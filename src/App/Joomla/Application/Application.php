@@ -20,6 +20,7 @@ use Joomla\Registry\Registry;
 use Joomla\Profiler\Profiler;
 use Joomla\DI\Container;
 use Joomla\DI\ContainerAwareInterface;
+use Joomla\DI\ServiceProviderInterface;
 
 //use App\Joomla\Authentication\Exception\AuthenticationException;
 //use App\Joomla\Authentication\GitHub\GitHubUser;
@@ -36,7 +37,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @since  1.0
  */
-final class Application extends AbstractWebApplication implements ContainerAwareInterface
+final class Application extends AbstractWebApplication implements ContainerAwareInterface, ServiceProviderInterface
 {
     /**
      * The Dispatcher object.
@@ -126,16 +127,37 @@ final class Application extends AbstractWebApplication implements ContainerAware
      */
     public function __construct()
     {
+        $container = $this->getContainer();
+        
+        $this->register($container);
+        
         // Run the parent constructor
         parent::__construct();
         
         $this->mark('application.start');
-        $this->getContainer()->set('profiler', $this->getProfiler(), false, true);
+        
+        $this->getContainer()->set('profiler', $container, false, true);
         
         // Register the application to Factory
         // @todo Decouple from Factory
         Factory::$application = $this;
-        Factory::$container = $this->getContainer() ;
+        Factory::$container = $container;
+    }
+    
+    /**
+	 * Registers the service provider with a DI container.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  Container  Returns itself to support chaining.
+	 *
+	 * @since   1.0
+	 */
+	public function register(Container $container)
+    {
+        $container->share('application', $this);
+        
+        return $this;
     }
     
     /**
@@ -175,7 +197,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
      */
     public function getContainer()
     {
-        if($this->container && $this->container instanceof Container) {
+        if($this->container instanceof Container) {
             return $this->container ;
         }
         
@@ -258,7 +280,8 @@ final class Application extends AbstractWebApplication implements ContainerAware
                     break;
                 }
             }
-            
+            $c = \App\Joomla\Controller\ControllerResolver::getController('@todo:Categories');
+            show($c);die;
             // Get component from container
             $component = $this->container->get('component.' . $componentName);
             
@@ -276,30 +299,6 @@ final class Application extends AbstractWebApplication implements ContainerAware
             
             echo $controller->execute();
             
-            
-            //$router->addMap($maps->_default->pattern, true);
-            
-            /*
-            //$router->addMaps($maps, true);
-            $router->setControllerPrefix('\\Component');
-            $router->setDefaultController('\\Todo\\Controller\\CategoriesController');
-            
-            // Fetch the controller
-            
-            $controller = $router->getController($this->get('uri.route'));
-
-            // Define the app path
-            define('JPATH_APP', JPATH_BASE . '/src/App/' . ucfirst($controller->getComponent()));
-
-            // Execute the component
-            $contents = $this->executeComponent($controller, strtolower($controller->getComponent()));
-
-            $this->mark('Application terminated');
-
-            $contents = str_replace('%%%DEBUG%%%', $this->debugger->getOutput(), $contents);
-
-            $this->setBody($contents);
-            */
         try
         {
         }
@@ -394,12 +393,14 @@ throw new \RuntimeException("Authentication failure.");
                 // Verify the configuration exists and is readable.
                 if(!$file->isReadable())
                 {
-                    throw new \RuntimeException('Configuration file does not exist or is unreadable.');
+                    continue;
                 }
                 
                 // Load the configuration file into Registry.
                 $path   = $file->getRealPath();
-                $ext    = $file->getExtension();
+                
+                $ext    = pathinfo((string) $file, PATHINFO_EXTENSION);
+                //$ext    = $file->getExtension();
                 $result = $this->config->loadFile($path, $ext);
                 
                 if (!$result)
@@ -412,14 +413,14 @@ throw new \RuntimeException("Authentication failure.");
                     $this->config->set('system.config_type', $ext);
                 }
                 
-                break;
+                define('JDEBUG', $this->get('debug.system'));
+        
+                return $this;
             }
             
         endforeach;
 
-        define('JDEBUG', $this->get('debug.system'));
-        
-        return $this;
+        throw new \RuntimeException('Configuration file does not exist or is unreadable.');
     }
     
     /**
@@ -471,7 +472,9 @@ throw new \RuntimeException("Authentication failure.");
                 throw new \RuntimeException($class.' not found');
             }
             
-            new $class($this, $container, $key);
+            $container->share('component.' . $key, function() use ($class, $container) {
+                return new $class($container->get('application'), $container);
+            });
         }
         
         return $this;
@@ -644,39 +647,6 @@ throw new \RuntimeException("Authentication failure.");
         }
 
         return $this->language;
-    }
-
-    /**
-     * Login or logout a user.
-     *
-     * @param   User  $user  The user object.
-     *
-     * @return  $this  Method allows chaining
-     *
-     * @since   1.0
-     */
-    public function setUser(User $user = null)
-    {
-        if (is_null($user))
-        {
-            // Logout
-            $this->user = new GitHubUser;
-
-            $this->getSession()->set('user', $this->user);
-
-            // @todo cleanup more ?
-        }
-        else
-        {
-            // Login
-            $user->isAdmin = in_array($user->username, $this->get('acl.admin_users'));
-
-            $this->user = $user;
-
-            $this->getSession()->set('user', $user);
-        }
-
-        return $this;
     }
 
     /**

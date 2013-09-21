@@ -64,17 +64,14 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Application $application, Container $container, $name = null)
+	public function __construct(Application $application, Container $container)
     {
         $this->application  = $application;
         $this->container    = $container;
         
 		$ref = $this->reflection = new \ReflectionClass($this);
         
-        if(!$name)
-        {
-            $name = str_replace('component', '', strtolower($ref->getShortName()));
-        }
+        $name = str_replace('component', '', strtolower($ref->getShortName()));
         
         $this->name = $name;
         
@@ -142,6 +139,16 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
         }
         
         return $this->defaultController;
+    }
+    
+    /**
+     * function getController
+     */
+    public function getController($name, $action)
+    {
+        $classname = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
+        
+        return new $classname;
     }
     
     /**

@@ -35,6 +35,7 @@ function show($data)
 
 // Define base path
 define('JPATH_BASE', dirname(__DIR__));
+
 require JPATH_BASE . '/app/defines.php';
 
 // Load the Composer autoloader
