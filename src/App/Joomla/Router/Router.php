@@ -13,6 +13,10 @@ use Joomla\Controller\ControllerInterface;
 use Joomla\Input\Input;
 use Joomla\Router\Router as RouterBase;
 use Joomla\Factory;
+use Joomla\DI\Container;
+
+use Joomla\DI\ContainerAwareInterface;
+use Joomla\DI\ServiceProviderInterface;
 use App\Joomla\Router\Exception\RoutingException;
 
 /**
@@ -20,7 +24,7 @@ use App\Joomla\Router\Exception\RoutingException;
  *
  * @since  1.0
  */
-class Router extends RouterBase
+class Router extends RouterBase implements ContainerAwareInterface, ServiceProviderInterface
 {
 	/**
 	 * Application object to inject into controllers
@@ -39,12 +43,62 @@ class Router extends RouterBase
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Input $input = null, AbstractApplication $app = null)
+	public function __construct(Input $input = null, AbstractApplication $app = null, Container $container = null)
 	{
-		parent::__construct($app->input);
+		parent::__construct($input);
+		
+		$this->container = $container;
 
 		$this->app = $app;
 	}
+	
+	/**
+	 * Registers the service provider with a DI container.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  Container  Returns itself to support chaining.
+	 *
+	 * @since   1.0
+	 */
+	public function register(Container $container)
+    {
+        $container->share('router', $this);
+        
+        return $this;
+    }
+	
+	/**
+     * Get the DI container.
+     *
+     * @return  Container
+     *
+     * @since   1.0
+     *
+     * @throws  \UnexpectedValueException May be thrown if the container has not been set.
+     */
+    public function getContainer()
+    {
+        if($this->container instanceof Container) {
+            return $this->container ;
+        }
+        
+        $this->setContainer(new Container);
+        
+        return $this->container ;
+    }
+    
+    /**
+     * Set the DI container.
+     *
+     * @param   Container  $container  The DI container.
+     *
+     * @since   1.0
+     */
+    public function setContainer(Container $container)
+    {
+        $this->container = $container ;
+    }
 
 	/**
 	 * Find and execute the appropriate controller based on a given route.

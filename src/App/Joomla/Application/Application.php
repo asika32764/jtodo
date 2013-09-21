@@ -126,11 +126,9 @@ final class Application extends AbstractWebApplication implements ContainerAware
      *
      * @since   1.0
      */
-    public function __construct()
+    public function __construct(Container $container = null)
     {
-        $container = $this->getContainer();
-        
-        $this->register($container);
+        $this->container = $container ?: $this->getContainer();
         
         // Run the parent constructor
         parent::__construct();
@@ -177,6 +175,9 @@ final class Application extends AbstractWebApplication implements ContainerAware
         
         // Register components
         $this->loadComponents();
+        
+        // Get Debugger
+        //$debugger = $this->container->get('component.debugger');
         
         // Register the event dispatcher
         $this->loadDispatcher();
@@ -251,8 +252,9 @@ final class Application extends AbstractWebApplication implements ContainerAware
     {
         
             // Instantiate the router
-            $router = new Router($this->input, $this);
-            $this->container->set('system.router', $router);
+            $router = new Router($this->input, $this, $this->container);
+            
+            $this->container->registerServiceProvider($router);
             
             // Get URI route from config
             $route = $this->get('uri.route');

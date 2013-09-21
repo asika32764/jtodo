@@ -14,7 +14,23 @@ abstract class ContainerAware implements ContainerAwareInterface
      * @var Container
      */
     protected $container = null;
-
+    
+    /**
+     * __construct description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  __constructReturn
+     *
+     * @since  1.0
+     */
+    public function __construct(Container $container = null)
+    {
+        $this->container = $container;
+    }
+    
     /**
      * Sets the Container associated with this Controller.
      *

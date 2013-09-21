@@ -9,13 +9,14 @@
 namespace App\Joomla\Controller;
 
 use App\Joomla\Factory;
+use App\Joomla\DI\Container;
 
 /**
  * Abstract Controller class for the Tracker Application
  *
  * @since  1.0
  */
-abstract class ControllerResolver
+class ControllerResolver extends ContainerAware 
 {
     /**
      * function getController
