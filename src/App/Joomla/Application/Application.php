@@ -29,6 +29,7 @@ use Joomla\DI\ServiceProviderInterface;
 use App\Joomla\Router\Exception\RoutingException;
 use App\Joomla\Router\Router;
 use App\Joomla\Factory;
+use App\Joomla\Controller\ControllerResolver;
 
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -280,8 +281,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
                     break;
                 }
             }
-            $c = \App\Joomla\Controller\ControllerResolver::getController('@todo:Categories');
-            show($c);die;
+            
             // Get component from container
             $component = $this->container->get('component.' . $componentName);
             
@@ -298,55 +298,6 @@ final class Application extends AbstractWebApplication implements ContainerAware
             $controller->setContainer($this->container);
             
             echo $controller->execute();
-            
-        try
-        {
-        }
-        catch (AuthenticationException $exception)
-        {
-            header('HTTP/1.1 403 Forbidden', true, 403);
-
-            $this->mark('Application terminated with an AUTH EXCEPTION');
-
-            $context = array();
-            $context['message'] = 'Authentication failure';
-
-            if (JDEBUG)
-            {
-                // The exceptions contains the User object and the action.
-                if ($exception->getUser()->username)
-                {
-                    $context['user'] = $exception->getUser()->username;
-                    $context['id'] = $exception->getUser()->id;
-                }
-
-                $context['action'] = $exception->getAction();
-            }
-throw new \RuntimeException("Authentication failure.");
-            $this->setBody($this->container->get('component.debugger')->renderException($exception, $context));
-        }
-        catch (RoutingException $exception)
-        {
-            header('HTTP/1.1 404 Not Found', true, 404);
-
-            $this->mark('Application terminated with a ROUTING EXCEPTION');
-
-            $context = JDEBUG ? array('message' => $exception->getRawRoute()) : array();
-            throw new \RuntimeException($exception->getMessage());
-            $this->setBody($this->debugger->renderException($exception, $context));
-        }
-        catch (\InvalidArgumentException $exception)
-        {
-            throw new \RuntimeException($exception->getMessage());
-        }
-        catch (\Exception $exception)
-        {
-            header('HTTP/1.1 500 Internal Server Error', true, 500);
-            
-            $this->mark('Application terminated with an EXCEPTION');
-            throw new \RuntimeException($exception->getMessage());
-            $this->setBody($this->container->get('component.debugger')->renderException($exception));
-        }
     }
 
     /**
@@ -508,6 +459,7 @@ throw new \RuntimeException("Authentication failure.");
      * @since   1.0
      * @throws  \Exception
      */
+    /*
     public function executeComponent($controller, $component)
     {
         // Load template language files.
@@ -522,20 +474,7 @@ throw new \RuntimeException("Authentication failure.");
 
         return ob_get_clean();
     }
-
-    /**
-     * Provides a secure hash based on a seed
-     *
-     * @param   string  $seed  Seed string.
-     *
-     * @return  string  A secure hash
-     *
-     * @since   1.0
-     */
-    public static function getHash($seed)
-    {
-        return md5(Factory::getConfig()->get('acl.secret') . $seed);
-    }
+    */
 
     /**
      * Get a session object.
@@ -573,31 +512,6 @@ throw new \RuntimeException("Authentication failure.");
         }
         
         return $this->profiler;
-    }
-
-    /**
-     * Get a user object.
-     *
-     * @param   integer  $id  The user id or the current user.
-     *
-     * @return  User
-     *
-     * @since   1.0
-     */
-    public function getUser($id = 0)
-    {
-        if ($id)
-        {
-            return new GitHubUser($id);
-        }
-
-        if (is_null($this->user))
-        {
-            $this->user = ($this->getSession()->get('user'))
-                ? : new GitHubUser;
-        }
-
-        return $this->user;
     }
 
     /**

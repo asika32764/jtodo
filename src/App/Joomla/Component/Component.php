@@ -144,11 +144,23 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
     /**
      * function getController
      */
-    public function getController($name, $action)
+    public function getController($name, $action = null)
     {
-        $classname = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
+        $container = $this->getContainer();
         
-        return new $classname;
+        try
+        {
+            $controllername = strtolower($this->getName()) . '.' . $name;
+            $controllername = $controllername ?: $controllername . '.' . $action;
+            $controller     = $container->get($controllername);
+        }
+        catch(\InvalidArgumentException $e)
+        {
+            $classname  = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
+            $controller = new $classname;
+        }
+        
+        return $controller;
     }
     
     /**
