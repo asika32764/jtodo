@@ -214,11 +214,6 @@ class TwigRenderer implements RendererInterface
 		}
 		else
 		{
-			if (!$value)
-			{
-				throw new \InvalidArgumentException('No value defined.');
-			}
- 
 			if ($global)
 			{
 				$this->getTwig()->addGlobal($key, $value);

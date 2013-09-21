@@ -146,7 +146,7 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
     /**
      * function getController
      */
-    public function getController($name, $action = null, Input $input = null)
+    public function getController($name, $action = null, $input = null)
     {
         $container = $this->getContainer();
         
@@ -162,7 +162,10 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
             
             $classname   = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
             
-            $input       = $input ?: clone $this->input;
+            if(!($input instanceof Input))
+			{
+				$input = new Input((array) $input);
+			}
             
             $application = $this->application;
             

@@ -84,6 +84,8 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
      */
     protected $messageType;
     
+    public $parent;
+    
     /**
      * Constructor.
      *
@@ -126,11 +128,72 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         
         $view = $this->getView($vName, $vFormat);
         
+        $view->set('input', $this->getInput()->getArray());
+        
         $view->setLayout($lName);
         
         $model = $this->getModel();
         
         return $view->render();
+    }
+    
+    /**
+     * executeChild description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  executeChildReturn
+     *
+     * @since  1.0
+     */
+    public function fetch($name, $data = array(), $isChild = true)
+    {
+        $resolver = $this->container->get('system.resolver.controller');
+        
+        // If we use HMVC to fetch other controllers
+        $data = (array) $data;
+        $data['isChild'] = $isChild;
+        $data['level']   = $this->getInput()->get('level') + 1;
+        $data['parent']  = $this->getReflection()->getName();
+        
+		$controller = $resolver->getController($name, $data);
+        $controller->parent = $this;
+        
+        return $controller;
+    }
+    
+    /**
+     * executeChild description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  executeChildReturn
+     *
+     * @since  1.0
+     */
+    public function forward($name, $data = null)
+    {
+        return $this->fetch($name, $data, false)->execute();
+    }
+    
+    /**
+     * getParent description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  getParentReturn
+     *
+     * @since  1.0
+     */
+    public function getParent()
+    {
+        return $this->parent;
     }
     
     /**
@@ -155,6 +218,34 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
     public function getContainer()
     {
         return $this->container;
+    }
+    
+    /**
+     * set description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  setReturn
+     *
+     * @since  1.0
+     */
+    public function set($key, $value = null)
+    {
+        if(is_array($key))
+        {
+            foreach($key as $k => $v)
+            {
+                $this->set($k, $v);
+            }
+        }
+        else
+        {
+            $this->getInput()->set($key, $value);
+        }
+        
+        return $this;
     }
     
     /**

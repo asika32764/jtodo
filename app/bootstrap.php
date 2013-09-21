@@ -14,7 +14,7 @@ $container = new Joomla\DI\Container;
 $container->registerServiceProvider(new App\Joomla\Application\Application($container));
 
 $container->share('system.resolver.controller', function($container){
-    new App\Controller\ControllerResolver($container);
+    return new App\Joomla\Controller\ControllerResolver($container);
 });
 
 return $container;

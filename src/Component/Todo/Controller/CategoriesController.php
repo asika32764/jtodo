@@ -34,13 +34,17 @@ class CategoriesController extends Controller
 	 */
 	public function execute()
 	{
-        $data = $this->container
-            ->get('component.todo')
-            ->getController('category', 'add', clone $this->getInput())
-            ->execute()
-            ;
+        $data = $this->fetch('@Todo:Category:Add', array(
+			'is_hmvc' => '123'
+		))->execute()
+		;
+		//$this->forward('substr/category/cat/add', array(
+		//	'is_hmvc' => '123'
+		//));
+		
         
+		$this->getView()->set('submit', $data);
         
-		return parent::execute() . $data;
+		return parent::execute();
 	}
 }

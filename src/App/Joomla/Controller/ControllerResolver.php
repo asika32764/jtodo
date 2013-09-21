@@ -9,7 +9,7 @@
 namespace App\Joomla\Controller;
 
 use App\Joomla\Factory;
-use App\Joomla\DI\Container;
+use App\Joomla\DI\ContainerAware;
 
 /**
  * Abstract Controller class for the Tracker Application
@@ -21,7 +21,7 @@ class ControllerResolver extends ContainerAware
     /**
      * function getController
      */
-    public static function getController($name)
+    public static function getController($name, $data = null)
     {
         $container = Factory::getContainer();
         
@@ -50,10 +50,10 @@ class ControllerResolver extends ContainerAware
         }
         catch(\Exception $e)
         {
-            throw new \RuntimeException(sprintf('Component % not found.', $component), null, $e);
+            throw new \RuntimeException(sprintf('Component %s not found.', $component), null, $e);
         }
         
-        $controller = $component->getController($controller, $action);
+        $controller = $component->getController($controller, $action, $data);
         
         return $controller;
     }

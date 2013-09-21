@@ -1,6 +1,6 @@
 {% extends "@Component/todo.twig" %}
 
-{% block form_body %}
+{% block body %}
 <table class="table table-bordered table-striped table-hover">
     <tr>
         <th>
@@ -21,4 +21,7 @@
     </tr>
     {% endfor %}
 </table>
+
+{{ submit|raw  }}
+
 {% endblock %}

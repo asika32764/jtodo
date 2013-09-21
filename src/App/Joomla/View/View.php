@@ -66,9 +66,19 @@ class View extends AbstractView implements ViewInterface
 	 *
 	 * @since  1.0
 	 */
-	public function set($key, $value)
+	public function set($key, $value = null)
 	{
-		$this->getData()->$key = $value;
+		if(is_array($key))
+        {
+            foreach($key as $k => $v)
+            {
+                $this->set($k, $v);
+            }
+        }
+        else
+		{
+			$this->getData()->$key = $value;
+		}
 		
 		return $this;
 	}
@@ -102,8 +112,12 @@ class View extends AbstractView implements ViewInterface
 	 */
 	public function getData()
 	{
-		$this->data = $this->data ?: new DataObject();
-		return $this->data;
+		if($this->data)
+		{
+			return $this->data;
+		}
+		
+		return $this->data = new DataObject();
 	}
     
     /**
