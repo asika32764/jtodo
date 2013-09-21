@@ -129,7 +129,7 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         $view->setLayout($lName);
         
         $model = $this->getModel();
-
+        
         return $view->render();
     }
     
@@ -277,7 +277,7 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         $viewClass = ucfirst($nameSpace) . '\\View\\' .
                      ucfirst($viewName) . '\\' . ucfirst($viewName) . ucfirst($viewType) . 'View'
                      ;
-        
+         
         if (!class_exists($viewClass))
         {
             throw new \RuntimeException('View Class ' . $viewClass . ' Not found.');

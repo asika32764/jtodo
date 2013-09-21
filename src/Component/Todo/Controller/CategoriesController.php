@@ -34,6 +34,13 @@ class CategoriesController extends Controller
 	 */
 	public function execute()
 	{
-		return parent::execute();
+        $data = $this->container
+            ->get('component.todo')
+            ->getController('category', 'add', clone $this->getInput())
+            ->execute()
+            ;
+        
+        
+		return parent::execute() . $data;
 	}
 }

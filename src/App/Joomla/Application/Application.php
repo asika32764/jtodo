@@ -412,6 +412,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
         
         // load components into DI Container
         $container = $this->getContainer();
+        $input = $this->input;
         
         foreach($components as $key => $name)
         {
@@ -423,8 +424,8 @@ final class Application extends AbstractWebApplication implements ContainerAware
                 throw new \RuntimeException($class.' not found');
             }
             
-            $container->share('component.' . $key, function() use ($class, $container) {
-                return new $class($container->get('application'), $container);
+            $container->share('component.' . $key, function() use ($class, $input, $container) {
+                return new $class($container->get('application'), $input, $container);
             });
         }
         

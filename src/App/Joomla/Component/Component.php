@@ -11,6 +11,7 @@ namespace App\Joomla\Component;
 use App\Joomla\Application\Application;
 use App\Joomla\DI\ContainerAware;
 use Joomla\Router\Router;
+use Joomla\Input\Input;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\DI\Container;
 
@@ -64,10 +65,11 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Application $application, Container $container)
+	public function __construct(Application $application, Input $input, Container $container)
     {
         $this->application  = $application;
         $this->container    = $container;
+        $this->input        = $input;
         
 		$ref = $this->reflection = new \ReflectionClass($this);
         
@@ -144,20 +146,38 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
     /**
      * function getController
      */
-    public function getController($name, $action = null)
+    public function getController($name, $action = null, Input $input = null)
     {
         $container = $this->getContainer();
         
         try
         {
             $controllername = strtolower($this->getName()) . '.' . $name;
-            $controllername = $controllername ?: $controllername . '.' . $action;
+            $controllername = !$action ? $controllername : $controllername . '.' . $action;
             $controller     = $container->get($controllername);
         }
-        catch(\InvalidArgumentException $e)
+        catch(\Exception $e)
         {
-            $classname  = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
-            $controller = new $classname;
+            $name = !$action ?: $name . '\\' . ucfirst($action);
+            
+            $classname   = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
+            
+            $input       = $input ?: $this->input;
+            
+            $application = $this->application;
+            
+            // Support lazyloading
+            $container->protect($controllername, function($container) use ($classname, $application, $input)
+            {
+                $controller = new $classname($input, $application);
+                
+                $controller->setContainer($container);
+                
+                return $controller;
+            });
+            
+            
+            $controller = $container->get($controllername);
         }
         
         return $controller;
