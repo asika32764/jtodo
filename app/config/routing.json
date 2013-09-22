@@ -11,6 +11,12 @@
             "pattern" : "todo",
             "component" : "todo"
         },
+        
+        "component_site_todo" : 
+        {
+            "pattern" : "site/todo",
+            "component" : "site/todo"
+        },
             
         "component_debug" : 
         {

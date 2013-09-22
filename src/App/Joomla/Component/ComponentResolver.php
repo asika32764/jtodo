@@ -39,7 +39,7 @@ class ComponentResolver extends ContainerAware
     {
         $name = $this->splitName($component);
         
-        echo $class = $this->prefix . '\\' . $name['namespace'] . '\\' . $name['name'] ;
+        $class = $this->prefix . '\\' . $name['namespace'] . '\\' . $name['name'] ;
         
         // Check for the requested controller.
         if (!class_exists($class) || !is_subclass_of($class, 'App\\Joomla\\Component\\ComponentInterface'))

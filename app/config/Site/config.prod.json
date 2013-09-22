@@ -1,6 +1,6 @@
 {
-    "debug" : {
-        "system" : 55
+    "system" : {
+        "debug" : true
     },
     
     "renderer" : {

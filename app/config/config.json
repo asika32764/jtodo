@@ -2,10 +2,6 @@
     "system" : {
     },
     
-    "debug" : {
-        "system" : true
-    },
-    
     "renderer" : {
         "type" : "twig",
         "aaa"  : "bbb"
