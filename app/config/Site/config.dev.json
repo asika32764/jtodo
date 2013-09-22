@@ -1,0 +1,11 @@
+{
+    "_extends" : "config.json",
+    
+    "debug" : {
+        "system" : false
+    },
+    
+    "renderer" : {
+        "type" : "php"
+    }
+}

@@ -11,7 +11,7 @@ require JPATH_BASE . '/vendor/joomla/framework/src/import.php';
 $container = new Joomla\DI\Container;
 
 // Instantiate the application.
-$container->registerServiceProvider(new App\Joomla\Application\Application($container));
+$container->registerServiceProvider(new Application($container));
 
 $container->share('system.resolver.controller', function($container){
     return new App\Joomla\Controller\ControllerResolver($container);

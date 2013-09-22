@@ -42,7 +42,13 @@ class CategoriesController extends Controller
 		//	'is_hmvc' => '123'
 		//));
 		
-        
+		//$config = new \App\Joomla\Config\Config(null, new \App\Joomla\Component\ComponentResolver);
+		
+		//$config->loadFile(JPATH_APPLICATION . '/config/config_dev.json');
+		
+		//show($config);
+		
+        //show($this->container->get('config'));die;
 		$this->getView()->set('submit', $data);
         
 		return parent::execute();

@@ -16,11 +16,11 @@ use Joomla\Github\Github;
 use Joomla\Github\Http;
 use Joomla\Http\HttpFactory;
 use Joomla\Language\Language;
-use Joomla\Registry\Registry;
 use Joomla\Profiler\Profiler;
 use Joomla\DI\Container;
 use Joomla\DI\ContainerAwareInterface;
 use Joomla\DI\ServiceProviderInterface;
+use Joomla\Filesystem\Path\PathCollection;
 
 //use App\Joomla\Authentication\Exception\AuthenticationException;
 //use App\Joomla\Authentication\GitHub\GitHubUser;
@@ -28,8 +28,10 @@ use Joomla\DI\ServiceProviderInterface;
 //use App\Joomla\Controller\AbstractTrackerController;
 use App\Joomla\Router\Exception\RoutingException;
 use App\Joomla\Router\Router;
+use App\Joomla\Registry\Registry;
 use App\Joomla\Factory;
 use App\Joomla\Controller\ControllerResolver;
+
 
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -38,7 +40,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @since  1.0
  */
-final class Application extends AbstractWebApplication implements ContainerAwareInterface, ServiceProviderInterface
+abstract class Application extends AbstractWebApplication implements ContainerAwareInterface, ServiceProviderInterface
 {
     /**
      * The Dispatcher object.
@@ -132,15 +134,6 @@ final class Application extends AbstractWebApplication implements ContainerAware
         
         // Run the parent constructor
         parent::__construct();
-        
-        $this->mark('application.start');
-        
-        $this->getContainer()->set('profiler', $container, false, true);
-        
-        // Register the application to Factory
-        // @todo Decouple from Factory
-        Factory::$application = $this;
-        Factory::$container = $container;
     }
     
     /**
@@ -167,25 +160,15 @@ final class Application extends AbstractWebApplication implements ContainerAware
      */
     protected function initialise()
     {
-        // Load the configuration object.
-        $this->loadConfiguration();
+        //$this->mark('application.start');
         
-        // Register the config to Factory
+        //$this->getContainer()->set('profiler', $container, false, true);
+        
+        $this->config = new Registry;
+        
+        Factory::$application = $this;
+        Factory::$container = $this->container;
         Factory::$config = $this->config;
-        
-        // Register components
-        $this->loadComponents();
-        
-        // Get Debugger
-        $debugger = $this->container->get('component.debugger')->registerDebugger();
-        
-        // Register the event dispatcher
-        $this->loadDispatcher();
-        
-        // Load the library language file
-        $this->getLanguage()->load('lib_joomla', JPATH_BASE);
-        
-        $this->mark('application.afterInitialise');
     }
     
     /**
@@ -218,6 +201,8 @@ final class Application extends AbstractWebApplication implements ContainerAware
     public function setContainer(Container $container)
     {
         $this->container = $container ;
+        
+        return $this;
     }
     
     /**
@@ -228,6 +213,8 @@ final class Application extends AbstractWebApplication implements ContainerAware
     public function setEnvironment($env)
     {
         $this->environment = $env ;
+        
+        return $this;
     }
     
     /**
@@ -250,57 +237,107 @@ final class Application extends AbstractWebApplication implements ContainerAware
      */
     protected function doExecute()
     {
+        // Load the configuration object.
+        $this->loadConfiguration();
         
-            // Instantiate the router
-            $router = new Router($this->input, $this, $this->container);
+        // Register components
+        $this->loadComponents();
+        
+        // Get Debugger
+        $debugger = $this->container->get('component.debugger')->registerDebugger();
+        
+        // Register the event dispatcher
+        $this->loadDispatcher();
+        
+        // Load the library language file
+        $this->getLanguage()->load('lib_joomla', JPATH_BASE);
+        
+        $this->mark('application.afterInitialise');
+        
+        
+        
+        // Instantiate the router
+        $router = new Router($this->input, $this, $this->container);
+        
+        $this->container->registerServiceProvider($router);
+        
+        // Get URI route from config
+        $route = $this->get('uri.route');
+        
+        // Get base routing file
+        $maps    = $this->config->get('routing');
+        
+        // Find base routing and component routing
+        $componentName = null;
+        
+        foreach((array)$maps as $map)
+        {
+            // Set * to '' ;
+            $map->pattern = ($map->pattern == '*') ? '' : $map->pattern;
+            $map->pattern;
+            // Add separator before route & pattern beacuse strpos() can not use empty string as params.
+            $route          = '/' . $route ;
+            $map->pattern   = '/' . $map->pattern;
             
-            $this->container->registerServiceProvider($router);
-            
-            // Get URI route from config
-            $route = $this->get('uri.route');
-            
-            // Get base routing file
-            $maps    = json_decode(file_get_contents(JPATH_CONFIGURATION . '/routing.json'));
-            
-            // Find base routing and component routing
-            $componentName = null;
-            
-            foreach((array)$maps as $map)
+            if(strpos($route, $map->pattern) !== false && !$componentName)
             {
-                // Set * to '' ;
-                $map->pattern = ($map->pattern == '*') ? '' : $map->pattern;
-                $map->pattern;
-                // Add separator before route & pattern beacuse strpos() can not use empty string as params.
-                $route          = '/' . $route ;
-                $map->pattern   = '/' . $map->pattern;
+                $componentName = $map->component ;
                 
-                if(strpos($route, $map->pattern) !== false && !$componentName)
-                {
-                    $componentName = $map->component ;
-                    
-                    $route = trim( substr($route, strlen($map->pattern) + 1 ), '/');
-                    
-                    break;
-                }
+                $route = trim( substr($route, strlen($map->pattern) + 1 ), '/');
+                
+                break;
             }
-            
-            // Get component from container
-            $component = $this->container->get('component.' . $componentName);
-            
-            // Parse route
-            $segments = explode('/', $route);
-            
-            $component->parseRoute($segments, $router);
-            
-            $router->setControllerPrefix('Component');
-            
-            $route = $route ?: '*';
-            
-            $controller = $router->getController($route);
-            $controller->setContainer($this->container);
-            
-            echo $controller->execute();
+        }
+        
+        // Get component from container
+        $component = $this->container->get('component.' . $componentName);
+        
+        // Parse route
+        $segments = explode('/', $route);
+        
+        $component->parseRoute($segments, $router);
+        
+        $router->setControllerPrefix('Component');
+        
+        $route = $route ?: '*';
+        
+        $controller = $router->getController($route);
+        $controller->setContainer($this->container);
+        
+        $this->setBody( $controller->execute());
+        
+        return true;
     }
+    
+    /**
+	 * Execute the application.
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function execute()
+	{
+		// @event onBeforeExecute
+
+		// Perform application routines.
+		$this->doExecute();
+
+		// @event onAfterExecute
+
+		// If gzip compression is enabled in configuration and the server is compliant, compress the output.
+		if ($this->get('gzip') && !ini_get('zlib.output_compression') && (ini_get('output_handler') != 'ob_gzhandler'))
+		{
+			$this->compress();
+		}
+
+		// @event onBeforeRespond
+
+		// Send the application response.
+		$this->respond();
+
+		// @event onAfterRespond
+	}
 
     /**
      * Add a profiler mark.
@@ -329,52 +366,41 @@ final class Application extends AbstractWebApplication implements ContainerAware
      * @since   1.0
      * @throws  \RuntimeException
      */
-    private function loadConfiguration()
+    protected function loadConfiguration()
     {
-        // Check for a custom configuration.
-        $type = $this->getEnvironment();
-
-        $name = ($type) ? 'config.' . $type : 'config';
-
-        // Find the configuration file.
-        foreach( new \FilesystemIterator(JPATH_CONFIGURATION) as $file ) :
+        $configs = new PathCollection($this->getConfigurationFiles());
         
-            $fileName = $file->getFileName();
-            
-            if(strpos($fileName, $name) !== false) {
-                
-                // Verify the configuration exists and is readable.
-                if(!$file->isReadable())
-                {
-                    continue;
-                }
-                
-                // Load the configuration file into Registry.
-                $path   = $file->getRealPath();
-                
-                $ext    = pathinfo((string) $file, PATHINFO_EXTENSION);
-                //$ext    = $file->getExtension();
-                $result = $this->config->loadFile($path, $ext);
-                
-                if (!$result)
-                {
-                    throw new \RuntimeException(sprintf('Unable to parse the configuration file %s.', $file));
-                }
-                
-                if(!$this->config->get('system.config_type'))
-                {
-                    $this->config->set('system.config_type', $ext);
-                }
-                
-                define('JDEBUG', $this->get('debug.system'));
+        $files = array();
         
-                return $this;
+        foreach($configs as $config)
+        {
+            if(!$config->isFile())
+            {
+                throw new \RuntimeException('Config not found: ' . $config);
             }
             
-        endforeach;
-
-        throw new \RuntimeException('Configuration file does not exist or is unreadable.');
+            $this->config->loadFile((string) $config);
+        }
+        
+        $this->container->share('config', $this->config);
+        
+        define('JDEBUG', $this->config->get('system.debug'));
+        
+        return $this;
     }
+    
+    /**
+     * getConfigurationFiles description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  getConfigurationFilesReturn
+     *
+     * @since  1.0
+     */
+    abstract protected function getConfigurationFiles();
     
     /**
      * Initialize the components and set them into container.
@@ -389,28 +415,7 @@ final class Application extends AbstractWebApplication implements ContainerAware
         // Get system environment name.
         $type = $this->getEnvironment();
         
-        // Set the component registration file name & path.
-        $name = ($type) ? 'components.' . $type : 'components';
-        
-        $filepath = JPATH_CONFIGURATION . '/' . $name . '.' . $this->config->get('system.config_type') ;
-        
-        // Load file.
-        $file = new \SplFileObject( $filepath );
-        
-        // Verify the file exists and is readable.
-        if(!$file->isReadable())
-        {
-            throw new \RuntimeException('Component registration file does not exist or is unreadable.');
-        }
-        
-        $components = json_decode(file_get_contents($filepath));
-        
-        if ($components === null)
-        {
-            throw new \RuntimeException(sprintf('Unable to parse the component registration file %s.', $filepath));
-        }
-        
-        $this->config->set('component', $components);
+        $components = $this->config->get('component');
         
         // load components into DI Container
         $container = $this->getContainer();

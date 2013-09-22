@@ -1,0 +1,9 @@
+{
+    "debug" : {
+        "system" : 55
+    },
+    
+    "renderer" : {
+        "type" : "php"
+    }
+}

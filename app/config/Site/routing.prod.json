@@ -1,0 +1,19 @@
+{
+    "_default" : 
+    {
+        "pattern" : "todo",
+        "component" : "todo"
+    },
+        
+    "component_todo" : 
+    {
+        "pattern" : "todo",
+        "component" : "todo"
+    },
+        
+    "component_debug" : 
+    {
+        "pattern" : "debugger",
+        "component" : "debugger"
+    }
+}
