@@ -13,6 +13,10 @@ $container = new Joomla\DI\Container;
 // Instantiate the application.
 $container->registerServiceProvider(new Application($container));
 
+$container->share('system.resolver.component', function($container){
+    return new App\Joomla\Component\ComponentResolver($container);
+});
+
 $container->share('system.resolver.controller', function($container){
     return new App\Joomla\Controller\ControllerResolver($container);
 });

@@ -22,6 +22,73 @@ class ComponentResolver extends ContainerAware
     
     protected $prefix = 'Component';
     
+    protected $container;
+    
+    /**
+     * loadComponent description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  loadComponentReturn
+     *
+     * @since  1.0
+     */
+    public function loadComponent($key, $component, $application = null, $input = null)
+    {
+        $name = $this->splitName($component);
+        
+        echo $class = $this->prefix . '\\' . $name['namespace'] . '\\' . $name['name'] ;
+        
+        // Check for the requested controller.
+        if (!class_exists($class) || !is_subclass_of($class, 'App\\Joomla\\Component\\ComponentInterface'))
+        {
+            throw new \RuntimeException($class.' not found');
+        }
+        
+        $application = $application ?: $this->container->get('application');
+        $input       = $input ?: $application->input;
+        
+        $this->container->share('component.' . strtolower($key), function($container) use ($class, $input, $application) {
+            return new $class($application, $input, $container);
+        });
+        
+        return $this;
+    }
+    
+    /**
+     * setPrefix description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  setPrefixReturn
+     *
+     * @since  1.0
+     */
+    public function setPrefix($prefix)
+    {
+        $this->prefix = $this->camelize($prefix);
+    }
+    
+    /**
+     * getPrefix description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  getPrefixReturn
+     *
+     * @since  1.0
+     */
+    public function getPrefix()
+    {
+        return $this->prefix;
+    }
+    
     /**
      * function getController
      */
@@ -119,6 +186,42 @@ class ComponentResolver extends ContainerAware
         }
         
         return $component;
+    }
+    
+    /**
+     * splitName description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  splitNameReturn
+     *
+     * @since  1.0
+     */
+    public function splitName($name)
+    {
+        $name = $this->camelize($name);
+        
+        $name = explode('\\', $name);
+        
+        $return = array();
+        
+        if(count($name) <= 1)
+        {
+            $return['name']           = $name[0] . 'Component';
+            $return['namespace_name'] = $name[0] . '\\' . $return['name'];
+            $return['namespace']      = $name[0];
+        }
+        else
+        {
+            $com_name = array_pop($name);
+            $return['name']           = $com_name . 'Component';
+            $return['namespace_name'] = implode('\\', $name) . '\\' . $com_name . '\\' . $return['name'];
+            $return['namespace']      = implode('\\', $name) . '\\' . $com_name;
+        }
+        
+        return $return;
     }
     
     /**

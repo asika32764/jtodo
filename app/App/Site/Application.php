@@ -16,6 +16,14 @@ use App\Joomla\Application\Application as JoomlaApplication;
 final class Application extends JoomlaApplication
 {
     /**
+     * The name of the application.
+     *
+     * @var    array
+     * @since  1.0
+     */
+    protected $name = 'Site';
+    
+    /**
      * Initialize the configuration object.
      *
      * @return  $this  Method allows chaining

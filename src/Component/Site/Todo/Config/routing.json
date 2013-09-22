@@ -1,0 +1,16 @@
+{
+    "todo_categories" : {
+        "pattern" : "categories" ,
+        "controller" : "\\Todo\\Controller\\CategoriesController"
+    },
+    
+    "todo_ggg" : {
+        "pattern" : "ggg" ,
+        "controller" : "\\Todo\\Controller\\GggController"
+    },
+    
+    "todo_category_add" : {
+        "pattern" : "category/add" ,
+        "controller" : "\\Todo\\Controller\\Category\\AddController"
+    }
+}

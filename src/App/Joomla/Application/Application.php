@@ -166,6 +166,8 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
         
         $this->config = new Registry;
         
+        $this->set('system.name', $this->getName());
+        
         Factory::$application = $this;
         Factory::$container = $this->container;
         Factory::$config = $this->config;
@@ -419,22 +421,14 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
         
         // load components into DI Container
         $container = $this->getContainer();
-        $input = $this->input;
-        $application = $this;
+        
+        $resolver = $container->get('system.resolver.component');
+        
+        // $resolver->setPrefix($resolver->getPrefix() . '\\' . $this->getName());
         
         foreach($components as $key => $name)
         {
-            $class = 'Component\\' . ucfirst($name) . '\\' . ucfirst($name) . 'Component' ;
-            
-            // Check for the requested controller.
-            if (!class_exists($class) /*|| !is_subclass_of($class, 'Joomla\\App\\Component\\ComponentInterface')*/)
-            {
-                throw new \RuntimeException($class.' not found');
-            }
-            
-            $container->share('component.' . $key, function($container) use ($class, $input, $application) {
-                return new $class($application, $input, $container);
-            });
+            $resolver->loadComponent($key, $name);
         }
         
         return $this;

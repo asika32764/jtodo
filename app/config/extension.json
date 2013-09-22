@@ -1,6 +1,6 @@
 {
     "component" :{
-        "todo"      : "Todo"
+        "todo"      : "Site\\Todo"
     }
 }
 
