@@ -24,6 +24,8 @@ class ComponentResolver extends ContainerAware
     
     protected $container;
     
+    protected $maps;
+    
     /**
      * loadComponent description
      *
@@ -92,9 +94,9 @@ class ComponentResolver extends ContainerAware
     /**
      * function getController
      */
-    public static function getName($name)
+    public function getName($name)
     {
-        $container = Factory::getContainer();
+        // Finaly we use this '@SiteTodo/Categories/Category';
         
         if(!$name)
         {
@@ -107,8 +109,12 @@ class ComponentResolver extends ContainerAware
         }
         else
         {
-            $component = explode('/', $name);
-            $component = $component[0];
+            $maps = $this->getMaps();
+            $maps = array_flip($maps);
+            
+            $name = $this->camelize($name);   
+            
+            $component = $maps[$name];
         }
         
         return $component;
@@ -186,6 +192,29 @@ class ComponentResolver extends ContainerAware
         }
         
         return $component;
+    }
+    
+    /**
+     * getComponentMap description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  getComponentMapReturn
+     *
+     * @since  1.0
+     */
+    public function getMaps()
+    {
+        if($this->maps)
+        {
+            return $this->maps;
+        }
+        
+        $maps = $this->container->get('config')->get('component');
+        
+        return $this->maps = array_change_key_case ((array) $maps, CASE_LOWER);
     }
     
     /**

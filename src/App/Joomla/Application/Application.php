@@ -256,7 +256,7 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
         
         $this->mark('application.afterInitialise');
         
-        
+        echo $this->container->get('system.resolver.component')->getName('Site/Todo');
         
         // Instantiate the router
         $router = new Router($this->input, $this, $this->container);
