@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Component\Todo\Controller\Category;
+namespace Component\Site\Todo\Controller\Category;
 
 use App\Joomla\Controller\Controller;
 

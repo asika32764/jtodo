@@ -96,11 +96,6 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
      */
     public function __construct(Input $input = null, AbstractApplication $app = null)
     {
-        if(!$app)
-        {
-            $app = Factory::$application;
-        }
-        
         parent::__construct($input, $app);
     }
 
@@ -155,10 +150,14 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         // If we use HMVC to fetch other controllers
         $data = (array) $data;
         $data['isChild'] = $isChild;
-        $data['level']   = $this->getInput()->get('level') + 1;
-        $data['parent']  = $this->getReflection()->getName();
         
-		$controller = $resolver->getController($name, $data);
+        if($isChild)
+        {
+            $data['level']   = $this->getInput()->get('level') + 1;
+            $data['parent']  = $this->getReflection()->getName();
+        }
+        
+		$controller = $resolver->getInstance($name, $data);
         $controller->parent = $this;
         
         return $controller;
@@ -175,7 +174,7 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
      *
      * @since  1.0
      */
-    public function forward($name, $data = null)
+    public function forward($name, $data = array())
     {
         return $this->fetch($name, $data, false)->execute();
     }
@@ -194,14 +193,6 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
     public function getParent()
     {
         return $this->parent;
-    }
-    
-    /**
-     * function render
-     */
-    public function render($view, $type, $component)
-    {
-        
     }
     
     /**

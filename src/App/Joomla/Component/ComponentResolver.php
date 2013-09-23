@@ -158,13 +158,19 @@ class ComponentResolver extends ContainerAware
      */
     public function getNamespace($name)
     {
-        $component = $this->getName($name);
+        $maps = $this->getMaps();
+        $key  = $this->getName($name);
         
-        $namespace = $this->container->get('config')->get('component.' . $name);
+        if(is_string($name) && $name[0] == '@')
+        {
+            $name = strtolower(str_replace('@', '', $name));
+            $name = $maps[$name];
+        }
+
+        $namespace = $this->container->get('config')->get('component.' . $key);
+        $namespace = trim($this->prefix, ' /\\') . '\\' . $name;
         
-        $namespace = trim($this->prefix, ' /\\') . '\\' . $namespace;
-        
-        return $this->camelize($name);
+        return $this->camelize($namespace);
     }
     
     /**

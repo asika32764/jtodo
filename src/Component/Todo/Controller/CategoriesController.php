@@ -34,7 +34,7 @@ class CategoriesController extends Controller
 	 */
 	public function execute()
 	{
-        $data = $this->fetch('@Todo:Category:Add', array(
+        $data = $this->fetch('@Todo/Category/Add', array(
 			'is_hmvc' => '123'
 		))->execute()
 		;
