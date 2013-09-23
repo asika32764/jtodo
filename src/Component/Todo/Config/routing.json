@@ -1,4 +1,9 @@
 {
+    "todo_default" : {
+        "pattern" : "/" ,
+        "controller" : "\\Todo\\Controller\\CategoriesController"
+    },
+    
     "todo_categories" : {
         "pattern" : "categories" ,
         "controller" : "\\Todo\\Controller\\CategoriesController"

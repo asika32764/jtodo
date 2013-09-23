@@ -26,6 +26,8 @@ class ComponentResolver extends ContainerAware
     
     protected $maps;
     
+    protected $indexSymbol = '@';
+    
     /**
      * loadComponent description
      *
@@ -94,18 +96,12 @@ class ComponentResolver extends ContainerAware
     /**
      * function getController
      */
-    public function getName($name)
+    public function getName($index)
     {
         // Finaly we use this '@SiteTodo/Categories/Category';
-        
-        if(!$name)
+        if(!($name = $this->stripIndex($index)))
         {
-            throw new \InvalidArgumentException('Component name is empty.');
-        }
-        
-        if($name[0] == '@')
-        {
-            $component = strtolower(str_replace('@', '', $name));
+            $component = $name;
         }
         else
         {
@@ -131,9 +127,14 @@ class ComponentResolver extends ContainerAware
      *
      * @since  1.0
      */
-    public function getPath($name, $absolute = true)
+    public function getPath($index, $absolute = true)
     {
-        $path = $this->getNamespace($name);
+        if(strpos($index, '.') !== false)
+        {
+            throw new \InvalidArgumentException(sprintf('Component index can not include dot (.), %s given.', $index));
+        }
+        
+        $path = $this->getNamespace($index);
         
         $path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
         
@@ -143,6 +144,34 @@ class ComponentResolver extends ContainerAware
         }
         
         return $path;
+    }
+    
+    /**
+     * convertPathIndex description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  convertPathIndexReturn
+     *
+     * @since  1.0
+     */
+    public function convertPathIndex($path)
+    {
+        $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+        
+        $path = explode(DIRECTORY_SEPARATOR, $path);
+        
+        foreach($path as &$name)
+        {
+            if($this->isIndex($name))
+            {
+                $name = $this->getPath($name, false);
+            }
+        }
+        
+        return implode(DIRECTORY_SEPARATOR, $path);
     }
     
     /**
@@ -156,17 +185,21 @@ class ComponentResolver extends ContainerAware
      *
      * @since  1.0
      */
-    public function getNamespace($name)
+    public function getNamespace($index)
     {
         $maps = $this->getMaps();
-        $key  = $this->getName($name);
+        $key  = $this->getName($index);
         
-        if(is_string($name) && $name[0] == '@')
+        if($name = $this->stripIndex($index))
         {
-            $name = strtolower(str_replace('@', '', $name));
+            $name = strtolower($name);
             $name = $maps[$name];
         }
-
+        else
+        {
+            $name = $index;
+        }
+        
         $namespace = $this->container->get('config')->get('component.' . $key);
         $namespace = trim($this->prefix, ' /\\') . '\\' . $name;
         
@@ -257,6 +290,43 @@ class ComponentResolver extends ContainerAware
         }
         
         return $return;
+    }
+    
+    /**
+     * isIndex description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  isIndexReturn
+     *
+     * @since  1.0
+     */
+    public function isIndex($name)
+    {
+        return ($name && is_string($name) && $name[0] == $this->indexSymbol) ? true : false;
+    }
+    
+    /**
+     * stripIndex description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  stripIndexReturn
+     *
+     * @since  1.0
+     */
+    public function stripIndex($index)
+    {
+        if(!$this->isIndex($index))
+        {
+            return false;
+        }
+        
+        return str_replace($this->indexSymbol, '', $index);
     }
     
     /**

@@ -271,7 +271,7 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
         $this->initialise();
         
         // Instantiate the router
-        $router = new Router($this->input, $this, $this->container);
+        $router = new Router($this->input, $this->container);
         
         $this->container->registerServiceProvider($router);
         
@@ -283,6 +283,10 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
         
         // Find base routing and component routing
         $componentName = null;
+        
+        $router->loadRouter();
+        
+        die;
         
         foreach((array)$maps as $map)
         {
