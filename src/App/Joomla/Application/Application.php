@@ -8,12 +8,11 @@
 
 namespace App\Joomla\Application;
 
+use Joomla\Input\Input;
 use Joomla\Application\AbstractWebApplication;
 use Joomla\Controller\ControllerInterface;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Event\Dispatcher;
-use Joomla\Github\Github;
-use Joomla\Github\Http;
 use Joomla\Http\HttpFactory;
 use Joomla\Language\Language;
 use Joomla\Profiler\Profiler;
@@ -132,8 +131,12 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
     {
         $this->container = $container ?: $this->getContainer();
         
+        // Since the AbstractApplication run initialise() in the bottom of __construct(),
+        // we set this cursor to make initialise run later.
+        $this->prepareInit = false;
+        
         // Run the parent constructor
-        parent::__construct();
+        parent::__construct(new Input, new Registry);
     }
     
     /**
@@ -160,17 +163,41 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
      */
     protected function initialise()
     {
-        //$this->mark('application.start');
+        if(!$this->prepareInit)
+        {
+            return $this;
+        }
         
-        //$this->getContainer()->set('profiler', $container, false, true);
+        // Make this method only run once.
+        static $inited;
         
-        $this->config = new Registry;
+        if($inited)
+        {
+            return $this;
+        }
         
         $this->set('system.name', $this->getName());
+        
+        // Load the configuration object.
+        $this->loadConfiguration();
+        
+        // Register components
+        $this->loadComponents();
+        
+        // Get Debugger
+        $debugger = $this->container->get('component.debugger')->registerDebugger();
+        
+        // Register the event dispatcher
+        $this->loadDispatcher();
+        
+        // Load the library language file
+        $this->getLanguage()->load('lib_joomla', JPATH_BASE);
         
         Factory::$application = $this;
         Factory::$container = $this->container;
         Factory::$config = $this->config;
+        
+        return $this;
     }
     
     /**
@@ -239,24 +266,9 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
      */
     protected function doExecute()
     {
-        // Load the configuration object.
-        $this->loadConfiguration();
+        $this->prepareInit = true;
         
-        // Register components
-        $this->loadComponents();
-        
-        // Get Debugger
-        $debugger = $this->container->get('component.debugger')->registerDebugger();
-        
-        // Register the event dispatcher
-        $this->loadDispatcher();
-        
-        // Load the library language file
-        $this->getLanguage()->load('lib_joomla', JPATH_BASE);
-        
-        $this->mark('application.afterInitialise');
-        
-        echo $this->container->get('system.resolver.component')->getName('Site/Todo');
+        $this->initialise();
         
         // Instantiate the router
         $router = new Router($this->input, $this, $this->container);

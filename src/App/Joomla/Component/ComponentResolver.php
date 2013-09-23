@@ -112,7 +112,7 @@ class ComponentResolver extends ContainerAware
             $maps = $this->getMaps();
             $maps = array_flip($maps);
             
-            $name = $this->camelize($name);   
+            $name = $this->camelize($name);
             
             $component = $maps[$name];
         }
