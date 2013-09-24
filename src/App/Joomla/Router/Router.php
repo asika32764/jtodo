@@ -19,6 +19,7 @@ use Joomla\DI\ContainerAwareInterface;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\Filesystem\Path;
 
+use App\Joomla\Registry\Registry;
 use App\Joomla\Router\Exception\RoutingException;
 
 /**
@@ -134,101 +135,141 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 	 */
 	public function loadRouter()
 	{
-		$config  = $this->container->get('config');
-		$routers = (array) $config->get('routing');
-		
 		$resolver = $this->container->get('system.resolver.component');
+		$config   = $this->container->get('config');
+		$routers  = (array) $config->get('routing');
+		
+		$defaultFiletype = $config->get('config.default_filetype', 'json');
+		$defaultRouting  = new \App\Joomla\Registry\Registry;
+		$defaultRouting->loadFile(JPATH_CONFIGURATION . '/DefaultRouting.' . $defaultFiletype);
+		$defaultRouting  = $defaultRouting->toObject();
 		
 		$component = array();
 		$routing   = new \Stdclass;
 		
 		foreach( $routers as $key => &$router )
 		{
-			// If controller setted, use controller resource
+			// If controller setted, use controller resource and ignore include
 			if(isset($router->controller))
 			{
 				$routing->$key = $router;
 				continue;
 			}
 			
-			// If include setted, we parse component routing config
-			if(isset($router->include))
+			// If has include resource, we use include first than component
+			// component value is necessary
+			if(!empty($router->include) && !empty($router->component))
 			{
-				$include = $router->include;
-				
-				// Get config by component index
-				if($resolver->isIndex($include))
+				try
 				{
-					$include = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $include);
-					
-					$splited = explode(DIRECTORY_SEPARATOR, $include);
-					
-					if(count($splited) == 1)
-					{
-						// Using index and get default routing file
-						// Example: @Component
-						$include = $resolver->getPath($include) . '/Config/routing.json';
-					}
-					elseif(count($splited) > 1)
-					{
-						// Using index to load file by absolute path
-						// Example: @Component/Config/routing.json
-						$include = $resolver->convertPathIndex($include);
-					}
+					/*
+					 * Case 1: Using relative component path to get default routing file
+					 * 
+					 * Example => include: Subdir/Component OR @SubdirCom
+					 *
+					 * That we get => Subdir/Component/Config/Routing.{filetype}
+					 */
+					$path = $resolver->getPath($router->include) . '/Config/Routing.' . $defaultFiletype;
 				}
-				// Get config by component namespace
-				else
+				catch(\InvalidArgumentException $e)
 				{
-					try
-					{
-						// Relative path as namespace
-						// Example: Subdir/Component
-						$include = $resolver->getPath($include) . '/Config/routing.json';
-					}
-					catch(\InvalidArgumentException $e)
-					{
-						// If get path failure, meaning it is an absolute path
-						// Example: Subdir/Component/Config/routing.json
-						$include = JPATH_SOURCE . '/' . $resolver->getPrefix() . '/' . $include;
-					}
+					/*
+					 * Case 2: If exception captched, meaning that it is an absolute path from src/
+					 *
+					 * Example => include : Subdir/Component/Config/routing.json
+					 *
+					 * That we get this file absolute path.
+					 */
+					$path = $resolver->convertPathIndex($router->include);
+				}
+			}
+			elseif(!empty($router->component))
+			{
+				/*
+				 * Case 3: If component value is an index, and include value not exists,
+				 *         we use component index to get routing file.
+				 *
+				 * Example => component : @SubdirCom
+				 *
+				 * That we get => Subdir/Component/Config/Routing.{filetype}
+				 */
+				$path = $resolver->getPath($router->component) . '/Config/routing.' . $defaultFiletype;
+			}
+			else
+			{
+				// controller & include are both not exists, throw error
+				throw new \InvalidArgumentException(sprintf('Router \'%s\' needs \'component\' or \'controller\' value.', $key));
+			}
+			
+			// Clean path
+			$path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+			
+			// Load include routing config
+			if(is_file($path))
+			{
+				$comRoutes = with(new Registry)->loadFile($path)->toObject();
+				
+				$comName = $router->component;
+				
+				// Add new routes to routing
+				foreach((array) $comRoutes as $subkey => $route)
+				{
+					$route->pattern   = rtrim($router->pattern, '/') . '/' . trim($route->pattern, '/');
+					$route->component = $comName;
+					$newkey = $key . '/' . $subkey;
+					$routing->$newkey = $route;
 				}
 				
-				$include = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $include);
-				
-				// Load include config
-				if(is_file($include))
+				// skip default route if pattern is '/', otherwise it will override all components
+				// Wee add default pattern after all
+				if(!$router->pattern || $router->pattern == '/')
 				{
-					$comRoutes = new \App\Joomla\Registry\Registry;
-					
-					$comRoutes->loadFile($include);
-					
-					$comRoutes = $comRoutes->toObject();
-					
-					foreach((array) $comRoutes as $subkey => $route)
-					{
-						$route->pattern = rtrim($router->pattern, '/') . '/' . trim($route->pattern, '/');
-						$newkey = $key . '/' . $subkey;
-						$routing->$newkey = $route;
-					}
+					$defaultKey = $key;
 					
 					continue;
 				}
-				else
+				
+				// Add default routes after component routes
+				foreach((array) $defaultRouting as $subkey => $route)
 				{
-					throw new \InvalidArgumentException(sprintf('Routing config %s not found.', $include));
+					$route = clone $route;
+					$route->pattern = rtrim($router->pattern, '/') . '/' . trim($route->pattern, '/');
+					$route->component = $comName;
+					$newkey = $key . '/' . $subkey;
+					$routing->$newkey = $route;
 				}
+				
+				continue;
 			}
-			
-			// controller & include are not exists, throw error
-			throw new \InvalidArgumentException(sprintf('Router \'%s\' needs \'include\' or \'controller\' resource.', $key));
+			else
+			{
+				throw new \InvalidArgumentException(sprintf('Routing config %s not found.', $path));
+			}
+		}
+		
+		// Add default routes after all routes added
+		if(!empty($defaultKey)){
+			foreach((array) $defaultRouting as $subkey => $route)
+			{
+				$route = clone $route;
+				$route->pattern = trim($route->pattern, '/');
+				$route->component = $comName;
+				$newkey = $defaultKey . '/' . $subkey;
+				$routing->$newkey = $route;
+			}
 		}
 		
 		// Now, we add these routers to Map
 		foreach((array) $routing as $route)
 		{
+			// Replace :component in all controllers
+			$route->controller = str_replace('{:component}', $resolver->getNamespace($route->component), $route->controller);
+			
 			if(!$route->pattern || $route->pattern == '/')
 			{
-				$route->pattern = '*';
+				$this->setDefaultController($route->controller);
+				
+				continue;
 			}
 			
 			$this->addMap($route->pattern, $route->controller);
@@ -236,7 +277,7 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 		
 		// Reset routing to config
 		$config->set('routing', $routing);
-		show($this->maps);
+		
 		return $this;
 	}
 
@@ -254,7 +295,7 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 	{
 		try
 		{
-			return parent::getController($route);
+			parent::getController($route);
 		}
 		catch (\InvalidArgumentException $e)
 		{
@@ -281,6 +322,10 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 	protected function parseRoute($route)
 	{
 		$controller = false;
+		
+		$restMethod = $this->fetchControllerSuffix();
+		
+		$restMethod = $restMethod ? '\\' . $restMethod : '';
 
 		// Trim the query string off.
 		$route = preg_replace('/([^?]*).*/u', '\1', $route);
@@ -288,31 +333,40 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 		// Sanitize and explode the route.
 		$route = trim(parse_url($route, PHP_URL_PATH), ' /');
 
-		// If the route is empty then simply return the default route.  No parsing necessary.
+		// If the route is empty then simply return the default route.  No parsing necessary. 
 		if ($route == '')
 		{
 			return $this->default;
 		}
-		
 
 		// Iterate through all of the known route maps looking for a match.
 		foreach ($this->maps as $rule)
 		{
 			if (preg_match($rule['regex'], $route, $matches))
 			{
-				// If we have gotten this far then we have a positive match.
-				$controller = $rule['controller'];
-
 				// Time to set the input variables.
 				// We are only going to set them if they don't already exist to avoid overwriting things.
 				foreach ($rule['vars'] as $i => $var)
 				{
 					$this->input->def($var, $matches[$i + 1]);
-
+					
+					// 假設 Todo\Controller\CategoriesController
+					// 要如何讓 Rest method 可以順暢的插入進去 Copntroller 的名字中？
+					// 可能要全面多一層資料夾
+					// 另外，要如何處理 Component 前綴字？
+					//show($route, $rule, $matches);die;
+					
+					
 					// Don't forget to do an explicit set on the GET superglobal.
 					$this->input->get->def($var, $matches[$i + 1]);
+					
+					// Replace controller vars
+					$rule['controller'] = str_replace("{:{$var}}", ucfirst($matches[$i + 1]), $rule['controller']);
 				}
-
+				
+				// If we have gotten this far then we have a positive match.
+				$controller = $rule['controller'];
+				
 				$this->input->def('_rawRoute', $route);
 
 				break;
@@ -324,7 +378,7 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 		{
 			throw new \InvalidArgumentException(sprintf('Unable to handle request for route `%s`.', $route), 404);
 		}
-
+show($controller);die;
 		return $controller;
 	}
 	
@@ -341,8 +395,8 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 	protected function fetchController($name)
 	{
 		// Derive the controller class name.
-		echo $class = $this->controllerPrefix . ucfirst($name);
-		die;
+		$class = $this->controllerPrefix . ucfirst($name);
+		
 		// If the controller class does not exist panic.
 		if (!class_exists($class) || !is_subclass_of($class, 'Joomla\\Controller\\ControllerInterface'))
 		{

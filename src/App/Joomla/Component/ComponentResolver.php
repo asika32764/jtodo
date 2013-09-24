@@ -20,6 +20,8 @@ class ComponentResolver extends ContainerAware
 {
     const ABSOLUTE_PATH = true;
     
+    const WITHOUT_PREFIX = false;
+    
     protected $prefix = 'Component';
     
     protected $container;
@@ -94,26 +96,82 @@ class ComponentResolver extends ContainerAware
     }
     
     /**
+     * getIndexSymbol description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  getIndexSymbolReturn
+     *
+     * @since  1.0
+     */
+    public function getIndexSymbol()
+    {
+        return $this->indexSymbol;
+    }
+    
+    /**
      * function getController
      */
     public function getName($index)
     {
         // Finaly we use this '@SiteTodo/Categories/Category';
-        if(!($name = $this->stripIndex($index)))
+        
+        // If $index is '@Component', we get lower case 'component' as key.
+        if($name = $this->stripIndex($index))
         {
-            $component = $name;
+            $component = strtolower($name);
         }
+        // Else if $index is the component namespace 'Subdir/Component', get key from maps.
         else
         {
             $maps = $this->getMaps();
             $maps = array_flip($maps);
             
-            $name = $this->camelize($name);
+            $name = $this->camelize($index);
+            
+            if(empty($maps[$name]))
+            {
+                throw new \InvalidArgumentException(sprintf('Component index: %s are not in maps', $index));
+            }
             
             $component = $maps[$name];
         }
         
         return $component;
+    }
+    
+    /**
+     * getComponentPath description
+     *
+     * @param  string
+     * @param  string
+     * @param  string
+     *
+     * @return  string  getComponentPathReturn
+     *
+     * @since  1.0
+     */
+    public function getNamespace($index, $prefix = true)
+    {
+        $maps = $this->getMaps();
+        $key  = $this->getName($index);
+        
+        if($name = $this->stripIndex($index))
+        {
+            $name = strtolower($name);
+            $name = $maps[$name];
+        }
+        else
+        {
+            $name = $index;
+        }
+        
+        $namespace = $this->container->get('config')->get('component.' . $key);
+        $namespace = $prefix ? trim($this->prefix, ' /\\') . '\\' . $name : $name;
+        
+        return $this->camelize($namespace);
     }
     
     /**
@@ -172,38 +230,6 @@ class ComponentResolver extends ContainerAware
         }
         
         return implode(DIRECTORY_SEPARATOR, $path);
-    }
-    
-    /**
-     * getComponentPath description
-     *
-     * @param  string
-     * @param  string
-     * @param  string
-     *
-     * @return  string  getComponentPathReturn
-     *
-     * @since  1.0
-     */
-    public function getNamespace($index)
-    {
-        $maps = $this->getMaps();
-        $key  = $this->getName($index);
-        
-        if($name = $this->stripIndex($index))
-        {
-            $name = strtolower($name);
-            $name = $maps[$name];
-        }
-        else
-        {
-            $name = $index;
-        }
-        
-        $namespace = $this->container->get('config')->get('component.' . $key);
-        $namespace = trim($this->prefix, ' /\\') . '\\' . $name;
-        
-        return $this->camelize($namespace);
     }
     
     /**

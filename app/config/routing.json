@@ -3,19 +3,26 @@
         "_default" : 
         {
             "pattern" : "/",
-            "include" : "Todo/Config/routing.json"
+            "component" : "Todo",
+            "include" : "@Todo/Config/routing.json"
         },
             
         "ComponentTodo" : 
         {
             "pattern" : "/todo",
-            "include" : "@Todo"
+            "component" : "@Todo"
         },
         
-        "component_site_todo" : 
+        "SiteTodo" : 
         {
             "pattern" : "/site/todo",
-            "include" : "Site\\Todo"
+            "component" : "@SiteTodo"
+        },
+        
+        "SiteTodo2" : 
+        {
+            "pattern" : "/site2/todo",
+            "component" : "Site\\Todo"
         }
     }
 }

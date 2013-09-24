@@ -1,0 +1,24 @@
+{
+    "_default_three_segments" : 
+    {
+        "pattern" : ":controller/:action/:id",
+        "controller" : "{:component}\\Controller\\{:controller}Controller"
+    },
+        
+    "_default_two_segments" :
+    {
+        "pattern" : ":controller/:id",
+        "controller" : "{:component}\\Controller\\{:controller}Controller"
+    },
+    
+    "_default_one_segments" :
+    {
+        "pattern" : ":controller",
+        "controller" : "{:component}\\Controller\\{:controller}Controller"
+    },
+    "_default_no_segments" :
+    {
+        "pattern" : "*",
+        "controller" : "{:component}\\Controller\\{:controller}Controller"
+    }
+}

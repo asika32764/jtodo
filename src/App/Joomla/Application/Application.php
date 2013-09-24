@@ -286,40 +286,11 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
         
         $router->loadRouter();
         
+        $controller = $router->getController($route);
+        
+        //show($controller);
         die;
         
-        foreach((array)$maps as $map)
-        {
-            // Set * to '' ;
-            $map->pattern = ($map->pattern == '*') ? '' : $map->pattern;
-            $map->pattern;
-            // Add separator before route & pattern beacuse strpos() can not use empty string as params.
-            $route          = '/' . $route ;
-            $map->pattern   = '/' . $map->pattern;
-            
-            if(strpos($route, $map->pattern) !== false && !$componentName)
-            {
-                $componentName = $map->component ;
-                
-                $route = trim( substr($route, strlen($map->pattern) + 1 ), '/');
-                
-                break;
-            }
-        }
-        
-        // Get component from container
-        $component = $this->container->get('component.' . $componentName);
-        
-        // Parse route
-        $segments = explode('/', $route);
-        
-        $component->parseRoute($segments, $router);
-        
-        $router->setControllerPrefix('Component');
-        
-        $route = $route ?: '*';
-        
-        $controller = $router->getController($route);
         $controller->setContainer($this->container);
         
         $this->setBody( $controller->execute());
