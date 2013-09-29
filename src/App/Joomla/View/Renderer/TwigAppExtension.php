@@ -29,7 +29,7 @@ class TwigAppExtension extends \Twig_Extension
 	 */
 	public function getName()
 	{
-		return 'tracker';
+		return 'JoomlaApp';
 	}
 
 	/**
@@ -68,6 +68,7 @@ class TwigAppExtension extends \Twig_Extension
 			new \Twig_SimpleFunction('statuses', array($this, 'getStatus')),
 			new \Twig_SimpleFunction('issueLink', array($this, 'issueLink')),
 			new \Twig_SimpleFunction('getRelTypes', array($this, 'getRelTypes')),
+			new \Twig_SimpleFunction('buildRoute', array($this, 'buildRoute')),
 		);
 
 		if (!JDEBUG)

@@ -123,7 +123,7 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         
         $view = $this->getView($vName, $vFormat);
         
-        $view->set('input', $this->getInput()->getArray());
+        $view->set('input', $input->getArray());
         
         $view->setLayout($lName);
         
