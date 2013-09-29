@@ -288,9 +288,6 @@ abstract class Application extends AbstractWebApplication implements ContainerAw
         
         $controller = $router->getController($route);
         
-        //show($controller);
-        die;
-        
         $controller->setContainer($this->container);
         
         $this->setBody( $controller->execute());

@@ -146,41 +146,11 @@ abstract class Component extends ContainerAware implements ComponentInterface, S
     /**
      * function getController
      */
-    public function getController($name, $action = null, $input = null)
+    public function getController($name, $input = null)
     {
         $container = $this->getContainer();
-        
-        try
-        {
-            $controllername = 'component.' . strtolower($this->getName()) . '.' . $name;
-            $controllername = !$action ? $controllername : $controllername . '.' . $action;
-            $controller     = $container->get($controllername);
-        }
-        catch(\Exception $e)
-        {
-            $name = !$action ?: $name . '\\' . ucfirst($action);
-            
-            $classname   = $this->getNamespace() . '\\Controller\\' . ucfirst($name) . 'Controller';
-            
-            if(!($input instanceof Input))
-			{
-				$input = new Input((array) $input);
-			}
-            
-            $application = $this->application;
-            
-            // Support lazyloading
-            $container->protect($controllername, function($container) use ($classname, $application, $input)
-            {
-                $controller = new $classname($input, $application);
-                
-                $controller->setContainer($container);
-                
-                return $controller;
-            });
-            
-            $controller = $container->get($controllername);
-        }
+		
+		$controller = $container->get('system.resolver.controller')->getInstance($name, $input);
         
         return $controller;
     }

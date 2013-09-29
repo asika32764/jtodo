@@ -49,7 +49,7 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 	 * @since  1.0
 	 */
 	protected $suffixMap = array(
-		'GET' => 'Index',
+		'GET' => '',
 		'POST' => 'Add',
 		'PUT' => 'Save',
 		'PATCH' => 'Save',
@@ -263,7 +263,9 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 		foreach((array) $routing as $route)
 		{
 			// Replace :component in all controllers
-			$route->controller = str_replace('{:component}', $resolver->getNamespace($route->component), $route->controller);
+			$route->controller = str_replace('{:component}', $resolver->getNamespace($route->component, false), $route->controller);
+			
+			$route->controller = $resolver->getPrefix() . '\\' . trim($route->controller, ' \\');
 			
 			if(!$route->pattern || $route->pattern == '/')
 			{
@@ -295,7 +297,7 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 	{
 		try
 		{
-			parent::getController($route);
+			return parent::getController($route);
 		}
 		catch (\InvalidArgumentException $e)
 		{
@@ -324,8 +326,6 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 		$controller = false;
 		
 		$restMethod = $this->fetchControllerSuffix();
-		
-		$restMethod = $restMethod ? '\\' . $restMethod : '';
 
 		// Trim the query string off.
 		$route = preg_replace('/([^?]*).*/u', '\1', $route);
@@ -350,13 +350,6 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 				{
 					$this->input->def($var, $matches[$i + 1]);
 					
-					// 假設 Todo\Controller\CategoriesController
-					// 要如何讓 Rest method 可以順暢的插入進去 Copntroller 的名字中？
-					// 可能要全面多一層資料夾
-					// 另外，要如何處理 Component 前綴字？
-					//show($route, $rule, $matches);die;
-					
-					
 					// Don't forget to do an explicit set on the GET superglobal.
 					$this->input->get->def($var, $matches[$i + 1]);
 					
@@ -378,8 +371,8 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
 		{
 			throw new \InvalidArgumentException(sprintf('Unable to handle request for route `%s`.', $route), 404);
 		}
-show($controller);die;
-		return $controller;
+
+		return $controller . $restMethod;
 	}
 	
 	/**

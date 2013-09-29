@@ -1,24 +1,24 @@
 {
     "_default_three_segments" : 
     {
-        "pattern" : ":controller/:id/:task",
-        "controller" : "\\{:component}\\Controller\\{:controller}Controller"
+        "pattern" : ":controller/:id/:action",
+        "controller" : "\\{:component}\\Controller\\{:controller}\\{:controller}Controller"
     },
         
     "_default_two_segments" :
     {
         "pattern" : ":controller/:id",
-        "controller" : "\\{:component}\\Controller\\{:controller}Controller"
+        "controller" : "\\{:component}\\Controller\\{:controller}\\{:controller}Controller"
     },
     
     "_default_one_segments" :
     {
         "pattern" : ":controller",
-        "controller" : "\\{:component}\\Controller\\{:controller}Controller"
+        "controller" : "\\{:component}\\Controller\\{:controller}\\{:controller}Controller"
     },
     "_default_no_segments" :
     {
         "pattern" : "*",
-        "controller" : "\\{:component}\\Controller\\{:controller}Controller"
+        "controller" : "\\{:component}\\Controller\\{:controller}\\{:controller}Controller"
     }
 }

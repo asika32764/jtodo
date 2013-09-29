@@ -6,13 +6,13 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Component\Todo\View\Categories;
+namespace Component\Site\Todo\View\Categories;
 
 use App\Joomla\View\HtmlView;
 use App\Joomla\View\Renderer\TwigRenderer;
 use App\Joomla\View\Layout\Layout;
 
-use Component\Todo\Model\CategoriesModel;
+use Component\Site\Todo\Model\CategoriesModel;
  
 class CategoriesHtmlView extends HtmlView
 {

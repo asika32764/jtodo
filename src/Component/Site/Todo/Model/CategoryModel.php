@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Component\Todo\Model;
+namespace Component\Site\Todo\Model;
 
 use App\Joomla\Model\Model;
  

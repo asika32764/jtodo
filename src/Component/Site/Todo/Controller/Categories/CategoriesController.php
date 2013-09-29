@@ -6,7 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Component\Todo\Controller;
+namespace Component\Site\Todo\Controller\Categories;
 
 use App\Joomla\Controller\Controller;
 
@@ -34,7 +34,7 @@ class CategoriesController extends Controller
 	 */
 	public function execute()
 	{
-        $data = $this->fetch('@Todo/Site/Category/Add', array(
+        $data = $this->fetch('@SiteTodo/Category/Add', array(
 			'is_hmvc' => '123'
 		))->execute()
 		;

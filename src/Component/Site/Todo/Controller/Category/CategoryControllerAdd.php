@@ -15,7 +15,7 @@ use App\Joomla\Controller\Controller;
  *
  * @since  1.0
  */
-class AddController extends Controller
+class CategoryControllerAdd extends Controller
 {
 	/**
 	 * The default view for the component

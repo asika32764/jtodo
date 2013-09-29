@@ -8,8 +8,11 @@
 
 namespace App\Joomla\Controller;
 
+use Joomla\Input\Input;
+
 use App\Joomla\Factory;
 use App\Joomla\DI\ContainerAware;
+
 
 /**
  * Abstract Controller class for the Tracker Application
@@ -60,9 +63,9 @@ class ControllerResolver extends ContainerAware
     {
         $name = $this->splitName($name);
         
-        $namespace = $name['component_namespace'] . '\\Controller\\' . $name['controller'];
+        $namespace = $name['component_namespace'] . '\\Controller\\' . $name['controller'] . '\\' . $name['controller'] . 'Controller';
         
-        $namespace = $name['action'] ? $namespace . '\\' . $name['action'] . 'Controller' : $namespace;
+        $namespace = $name['action'] ? $namespace . $name['action'] : $namespace;
         
         return $namespace;
     }
@@ -95,40 +98,43 @@ class ControllerResolver extends ContainerAware
     /**
      * function getController
      */
-    public function getInstance($name, $data = null)
+    public function getInstance($name, $input = null)
     {
-        $container = $this->getContainer();
+        $container   = $this->getContainer();
+        $comResolver = $container->get('system.resolver.component');
         
-        // @SubdirTodo:Category:Save
-        $name = $this->camelize($name);
-        $name = explode('\\', $name);
+        $splited = $this->splitName($name);
         
-        if(count($name) == 2)
-        {
-            list($component, $controller) = $name;
-            $action = null;
-        }
-        elseif(count($name) == 3)
-        {
-            list($component, $controller, $action) = $name;
-        }
-        else
-        {
-            throw new \InvalidArgumentException(sprintf('Controller %s not found.', implode(':', $name)));
-        }
-        
-        $component = strtolower(str_replace('@', '', $component));
+        if(!($input instanceof Input))
+		{
+			$input = new Input((array) $input);
+		}
         
         try
         {
-            $component = $container->get('component.' . $component);
+            $controllername = 'component.' . $splited['component'] . '.' . strtolower($splited['controller']);
+            $controllername = !$splited['action'] ? $controllername : $controllername . '.' . strtolower($splited['action']);
+            $controller     = $container->get($controllername);
         }
         catch(\Exception $e)
         {
-            throw new \RuntimeException(sprintf('Component %s not found.', $component), null, $e);
+            $classname   = $splited['component_namespace'] . '\\Controller\\' . $splited['controller'] .
+                            '\\' . $splited['controller'] . 'Controller' . $splited['action'];
+            
+            $application = $container->get('application');
+            
+            // Support lazyloading
+            $container->protect($controllername, function($container) use ($classname, $application, $input)
+            {
+                $controller = new $classname($input, $application);
+                
+                $controller->setContainer($container);
+                
+                return $controller;
+            });
+            
+            $controller = $container->get($controllername);
         }
-        
-        $controller = $component->getController($controller, $action, $data);
         
         return $controller;
     }

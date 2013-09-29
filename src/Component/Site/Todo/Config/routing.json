@@ -1,7 +1,7 @@
 {
     "todo_categories" : {
         "pattern" : "categories" ,
-        "controller" : "\\Todo\\Controller\\CategoriesController"
+        "controller" : "Site\\Todo\\Controller\\Categories\\CategoriesController"
     },
     
     "todo_ggg" : {
@@ -9,8 +9,8 @@
         "controller" : "\\Todo\\Controller\\GggController"
     },
     
-    "todo_category_add" : {
-        "pattern" : "category/add" ,
-        "controller" : "\\Todo\\Controller\\Category\\AddController"
+    "todo_category" : {
+        "pattern" : "category" ,
+        "controller" : "Site\\Todo\\Controller\\Category\\CategoryController"
     }
 }

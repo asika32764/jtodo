@@ -2,8 +2,8 @@
     "routing" : {
         "site_todo" : 
         {
-            "pattern" : "todo",
-            "component" : "@Todo"
+            "pattern" : "site/todo",
+            "component" : "@SiteTodo"
         }
     }
     
