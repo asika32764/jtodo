@@ -21,42 +21,6 @@ use App\Joomla\View\Renderer\RendererInterface;
 abstract class HtmlView extends View
 {
 	public $templatePaths = array();
-	
-	/**
-	 * Method to instantiate the view.
-	 *
-	 * @param   ModelInterface  $model           The model object.
-	 * @param   string|array    $templatesPaths  The templates paths.
-	 *
-	 * @throws  \RuntimeException
-	 * @since   1.0
-	 */
-	public function __construct(ModelInterface $model = null, RendererInterface $renderer = null)
-	{
-		parent::__construct($model, $renderer);
-		
-		$app = \Joomla\Factory::$application;
-		
-		$templatePath = $this->getPath() . '/../../Template' ;
-		$templatePath = realpath($templatePath);
-		
-		$basePath = $templatePath . '/' . $this->getName();
-		
-		// Set Template paths
-		$this->templatePaths = array(
-			'Self'      => $basePath,
-			'Component' => $templatePath,
-			'Global'    => JPATH_TEMPLATES
-		);
-		
-		$renderer->setPaths($this->templatePaths);
-		
-		// Retrieve and clear the message queue
-		//$this->set('flashBag', $app->getMessageQueue());
-		//$app->clearMessageQueue();
-		
-		$this->setRenderer($renderer);
-	}
 
 	/**
 	 * Method to escape output.

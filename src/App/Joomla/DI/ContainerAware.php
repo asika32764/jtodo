@@ -32,18 +32,26 @@ abstract class ContainerAware implements ContainerAwareInterface
     }
     
     /**
-     * Sets the Container associated with this Controller.
-     *
-     * @param ContainerInterface $container A ContainerInterface instance
-     */
+	 * Get the DI container.
+	 *
+	 * @return  Container
+	 *
+	 * @since   1.0
+	 *
+	 * @throws  \UnexpectedValueException May be thrown if the container has not been set.
+	 */
     public function setContainer(Container $container = null)
     {
         $this->container = $container;
     }
     
     /**
-     * function getContainer
-     */
+	 * Set the DI container.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @since   1.0
+	 */
     public function getContainer()
     {
         return $this->container;

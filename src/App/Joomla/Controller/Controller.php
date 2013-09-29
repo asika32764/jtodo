@@ -378,6 +378,7 @@ abstract class Controller extends AbstractController implements ContainerAwareIn
         {
             // If View not exists, create one.
             $view = $container->buildObject($viewClass, true);
+            $view->setContainer($container);
         }
         
         if (!$view)

@@ -16,7 +16,9 @@
             {{ cat.id }}
         </td>
         <td>
-            {{ cat.title }}
+            <a href="{{ router.build('SiteTodo/_default_two_segments', {id:5, controller: 'category'}) }}">
+                {{ cat.title }}
+            </a>
         </td>
     </tr>
     {% endfor %}

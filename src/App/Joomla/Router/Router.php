@@ -123,6 +123,45 @@ class Router extends JoomlaRouter implements ContainerAwareInterface, ServicePro
     }
 	
 	/**
+	 * build description
+	 *
+	 * @param  string
+	 * @param  string
+	 * @param  string
+	 *
+	 * @return  string  buildReturn
+	 *
+	 * @since  1.0
+	 */
+	public function build($key, $data = array())
+	{
+		$config = $this->container->get('config');
+		
+		$routing = $config->get('routing');
+		
+		if(empty($routing->$key))
+		{
+			return null;
+		}
+		else
+		{
+			$route   = $routing->$key;
+			$pattern = $route->pattern;
+			
+			foreach((array) $data as $key => $val)
+			{
+				$pattern = str_replace(':' . $key, $val, $pattern);
+			}
+			
+			$pattern = $config->get('uri.base.path') . trim($pattern, '/');
+			
+			return $pattern;
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * defineRouting description
 	 *
 	 * @param  string

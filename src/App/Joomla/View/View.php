@@ -11,6 +11,7 @@ namespace App\Joomla\View;
 use Joomla\View\AbstractView;
 use Joomla\Model\ModelInterface;
 use Joomla\Data\DataObject;
+use Joomla\DI\Container;
 
 use App\Joomla\View\ViewInterface;
 use App\Joomla\View\Layout\Layout;
@@ -36,7 +37,71 @@ class View extends AbstractView implements ViewInterface
     protected $namespace;
 	
 	protected $data;
+	
+	protected $container;
     
+	/**
+	 * Method to instantiate the view.
+	 *
+	 * @param   ModelInterface  $model           The model object.
+	 * @param   string|array    $templatesPaths  The templates paths.
+	 *
+	 * @throws  \RuntimeException
+	 * @since   1.0
+	 */
+	public function __construct(ModelInterface $model = null, RendererInterface $renderer = null)
+	{
+		parent::__construct($model, $renderer);
+		
+		$app = \Joomla\Factory::$application;
+		
+		$templatePath = $this->getPath() . '/../../Template' ;
+		$templatePath = realpath($templatePath);
+		
+		$basePath = $templatePath . '/' . $this->getName();
+		
+		// Set Template paths
+		$this->templatePaths = array(
+			'Self'      => $basePath,
+			'Component' => $templatePath,
+			'Global'    => JPATH_TEMPLATES
+		);
+		
+		$renderer->setPaths($this->templatePaths);
+		
+		// Retrieve and clear the message queue
+		//$this->set('flashBag', $app->getMessageQueue());
+		//$app->clearMessageQueue();
+		
+		$this->setRenderer($renderer);
+	}
+	
+	/**
+	 * Get the DI container.
+	 *
+	 * @return  Container
+	 *
+	 * @since   1.0
+	 *
+	 * @throws  \UnexpectedValueException May be thrown if the container has not been set.
+	 */
+    public function setContainer(Container $container = null)
+    {
+        $this->container = $container;
+    }
+    
+    /**
+	 * Set the DI container.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @since   1.0
+	 */
+    public function getContainer()
+    {
+        return $this->container;
+    }
+	
     /**
      * function getModel
      */
@@ -240,7 +305,11 @@ class View extends AbstractView implements ViewInterface
 	 */
 	public function render()
 	{
-		return $this->getRenderer()->render($this->getLayout(), (array) $this->getData()->dump());
+		$renderer = $this->getRenderer();
+		
+		$this->set('router', $this->container->get('router'));
+		
+		return $renderer->render($this->getLayout(), (array) $this->getData()->dump());
 	}
     
     /**
