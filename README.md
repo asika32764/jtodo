@@ -1,5 +1,5 @@
-jtodo
+Joomla Framework Development Package
 =====
 
-Todo application built on the Joomla! Framework integrating with GitHub.
+A Development Package in experimental nature.
 
